@@ -53,3 +53,14 @@ export interface ComponentWithMetrics extends SubComponent {
   status: ReorderStatus;
   totalInventoryValue: number;
 }
+
+export interface SaleRecord {
+  orderId: string;
+  saleDate: string;
+  fullName: string;
+  shipCity: string;
+  shipState: string;    // 2-letter code for US; may be empty for international
+  shipCountry: string;  // full country name as in the CSV
+  orderValue: number;
+  numItems: number;
+}
