@@ -95,7 +95,7 @@ function extractMetaFromHtml(html: string): { title: string; description: string
     doc.querySelector('meta[property="og:description"]')?.getAttribute('content') ??
     doc.querySelector('meta[name="description"]')?.getAttribute('content') ??
     '';
-  const title = ogTitle.replace(/\s*[|–\-].*$/, '').trim();
+  const title = ogTitle.replace(/\s*[|–-].*$/, '').trim();
   return title ? { title, description: ogDesc } : null;
 }
 
@@ -354,8 +354,6 @@ export function EtsySeoTool() {
     setKeyDraft('');
   }
 
-  // @ts-expect-error -- wired to provider tab UI in Task 4
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- wired to provider tab UI in Task 4
   function switchProvider(id: ProviderId) {
     setActiveProvider(id);
     localStorage.setItem('active_seo_provider', id);
@@ -442,7 +440,9 @@ export function EtsySeoTool() {
           <div className="flex items-center gap-2.5">
             <Key size={15} className={hasKey ? 'text-emerald-500' : 'text-slate-400'} />
             <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-              {hasKey ? 'Claude API Key connected' : 'Connect Claude API Key'}
+              {hasKey
+                ? `${PROVIDERS.find((p) => p.id === activeProvider)!.label} API Key connected`
+                : 'Connect AI API Key'}
             </span>
             {hasKey && (
               <span className="text-[10px] bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-600/30 px-2 py-0.5 rounded-full font-medium">
@@ -454,36 +454,77 @@ export function EtsySeoTool() {
         </button>
 
         {showKeyPanel && (
-          <div className="px-4 pb-4 border-t border-slate-100 dark:border-slate-700/40 pt-3 space-y-3">
-            <p className="text-slate-500 text-xs leading-relaxed">
-              Your API key is stored locally in your browser and never sent anywhere except Anthropic's API.
-              Get one at{' '}
-              <a href="https://console.anthropic.com" target="_blank" rel="noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-0.5">
-                console.anthropic.com <ExternalLink size={10} />
-              </a>
-            </p>
-            <div className="flex gap-2">
-              <input
-                type="password"
-                placeholder="sk-ant-..."
-                value={keyDraft}
-                onChange={(e) => setKeyDraft(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && saveKey()}
-                className={`flex-1 ${inputCls}`}
-              />
-              <button
-                onClick={saveKey}
-                disabled={!keyDraft.trim()}
-                className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white text-sm font-medium rounded-xl transition-colors cursor-pointer border-none shrink-0"
-              >
-                Save
-              </button>
+          <div className="border-t border-slate-100 dark:border-slate-700/40">
+            {/* Provider tabs */}
+            <div className="flex gap-1 p-3 pb-0">
+              {PROVIDERS.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => switchProvider(p.id)}
+                  className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer border-none ${
+                    activeProvider === p.id
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-slate-100 dark:bg-slate-900/50 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                  }`}
+                >
+                  {p.label}
+                  {keys[p.id] && (
+                    <span className="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 align-middle" />
+                  )}
+                </button>
+              ))}
             </div>
-            {hasKey && (
-              <button onClick={clearKey} className="text-xs text-red-500 hover:text-red-600 cursor-pointer border-none bg-transparent p-0 transition-colors">
-                Remove saved key
-              </button>
-            )}
+
+            {/* Key input for active provider */}
+            <div className="px-4 pb-4 pt-3 space-y-3">
+              {(() => {
+                const consoleUrls: Record<ProviderId, { href: string; label: string }> = {
+                  claude: { href: 'https://console.anthropic.com', label: 'console.anthropic.com' },
+                  gemini: { href: 'https://aistudio.google.com/app/apikey', label: 'aistudio.google.com' },
+                  openai: { href: 'https://platform.openai.com/api-keys', label: 'platform.openai.com' },
+                };
+                const placeholders: Record<ProviderId, string> = {
+                  claude: 'sk-ant-...',
+                  gemini: 'AIza...',
+                  openai: 'sk-...',
+                };
+                const activeProviderConfig = PROVIDERS.find((p) => p.id === activeProvider)!;
+                const { href, label } = consoleUrls[activeProvider];
+                return (
+                  <>
+                    <p className="text-slate-500 text-xs leading-relaxed">
+                      Your {activeProviderConfig.label} API key is stored locally and never sent anywhere except {activeProviderConfig.label}'s API.
+                      Get one at{' '}
+                      <a href={href} target="_blank" rel="noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-0.5">
+                        {label} <ExternalLink size={10} />
+                      </a>
+                    </p>
+                    <div className="flex gap-2">
+                      <input
+                        type="password"
+                        placeholder={placeholders[activeProvider]}
+                        value={keyDraft}
+                        onChange={(e) => setKeyDraft(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && saveKey()}
+                        className={`flex-1 ${inputCls}`}
+                      />
+                      <button
+                        onClick={saveKey}
+                        disabled={!keyDraft.trim()}
+                        className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white text-sm font-medium rounded-xl transition-colors cursor-pointer border-none shrink-0"
+                      >
+                        Save
+                      </button>
+                    </div>
+                    {keys[activeProvider] && (
+                      <button onClick={clearKey} className="text-xs text-red-500 hover:text-red-600 cursor-pointer border-none bg-transparent p-0 transition-colors">
+                        Remove saved key
+                      </button>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
           </div>
         )}
       </div>
