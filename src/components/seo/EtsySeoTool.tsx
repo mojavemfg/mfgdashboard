@@ -137,7 +137,7 @@ async function callClaude(
       'anthropic-dangerous-direct-browser-access': 'true',
     },
     body: JSON.stringify({
-      model: PROVIDERS.find((p) => p.id === 'claude')!.model,
+      model: PROVIDERS[0].model,
       max_tokens: 1024,
       messages: [{ role: 'user', content: buildPrompt(title, description, category) }],
     }),
