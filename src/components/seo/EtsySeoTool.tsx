@@ -39,6 +39,18 @@ const PROVIDERS: ProviderConfig[] = [
   { id: 'openai',  label: 'OpenAI',  storageKey: 'openai_api_key',    model: 'gpt-4o-mini' },
 ];
 
+const CONSOLE_URLS: Record<ProviderId, { href: string; label: string }> = {
+  claude: { href: 'https://console.anthropic.com', label: 'console.anthropic.com' },
+  gemini: { href: 'https://aistudio.google.com/app/apikey', label: 'aistudio.google.com' },
+  openai: { href: 'https://platform.openai.com/api-keys', label: 'platform.openai.com' },
+};
+
+const KEY_PLACEHOLDERS: Record<ProviderId, string> = {
+  claude: 'sk-ant-...',
+  gemini: 'AIza...',
+  openai: 'sk-...',
+};
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function buildPrompt(title: string, description: string, category: string): string {
@@ -456,10 +468,12 @@ export function EtsySeoTool() {
         {showKeyPanel && (
           <div className="border-t border-slate-100 dark:border-slate-700/40">
             {/* Provider tabs */}
-            <div className="flex gap-1 p-3 pb-0">
+            <div role="tablist" aria-label="AI provider" className="flex gap-1 p-3 pb-0">
               {PROVIDERS.map((p) => (
                 <button
                   key={p.id}
+                  role="tab"
+                  aria-selected={activeProvider === p.id}
                   onClick={() => switchProvider(p.id)}
                   className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer border-none ${
                     activeProvider === p.id
@@ -478,18 +492,8 @@ export function EtsySeoTool() {
             {/* Key input for active provider */}
             <div className="px-4 pb-4 pt-3 space-y-3">
               {(() => {
-                const consoleUrls: Record<ProviderId, { href: string; label: string }> = {
-                  claude: { href: 'https://console.anthropic.com', label: 'console.anthropic.com' },
-                  gemini: { href: 'https://aistudio.google.com/app/apikey', label: 'aistudio.google.com' },
-                  openai: { href: 'https://platform.openai.com/api-keys', label: 'platform.openai.com' },
-                };
-                const placeholders: Record<ProviderId, string> = {
-                  claude: 'sk-ant-...',
-                  gemini: 'AIza...',
-                  openai: 'sk-...',
-                };
                 const activeProviderConfig = PROVIDERS.find((p) => p.id === activeProvider)!;
-                const { href, label } = consoleUrls[activeProvider];
+                const { href, label } = CONSOLE_URLS[activeProvider];
                 return (
                   <>
                     <p className="text-slate-500 text-xs leading-relaxed">
@@ -502,7 +506,7 @@ export function EtsySeoTool() {
                     <div className="flex gap-2">
                       <input
                         type="password"
-                        placeholder={placeholders[activeProvider]}
+                        placeholder={KEY_PLACEHOLDERS[activeProvider]}
                         value={keyDraft}
                         onChange={(e) => setKeyDraft(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && saveKey()}
