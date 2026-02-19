@@ -165,6 +165,90 @@ async function callClaude(
   return { tags, strategy: parsed.strategy ?? '' };
 }
 
+async function callGemini(
+  title: string,
+  description: string,
+  category: string,
+  apiKey: string,
+): Promise<AnalysisResult> {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: buildPrompt(title, description, category) }] }],
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({})) as { error?: { message?: string } };
+    throw new Error(err.error?.message ?? `Gemini API error ${res.status}`);
+  }
+
+  const data = await res.json() as { candidates: { content: { parts: { text: string }[] } }[] };
+  const text = data.candidates[0]?.content?.parts[0]?.text ?? '';
+
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('Could not parse response from Gemini.');
+
+  const parsed = JSON.parse(jsonMatch[0]) as { tags: string[]; strategy: string };
+  const tags: TagResult[] = parsed.tags.slice(0, TAG_COUNT).map((t: string) => {
+    const tag = t.toLowerCase().trim();
+    return { tag, charCount: tag.length, valid: tag.length <= MAX_CHARS };
+  });
+  return { tags, strategy: parsed.strategy ?? '' };
+}
+
+async function callOpenAI(
+  title: string,
+  description: string,
+  category: string,
+  apiKey: string,
+): Promise<AnalysisResult> {
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      max_tokens: 1024,
+      messages: [{ role: 'user', content: buildPrompt(title, description, category) }],
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({})) as { error?: { message?: string } };
+    throw new Error(err.error?.message ?? `OpenAI API error ${res.status}`);
+  }
+
+  const data = await res.json() as { choices: { message: { content: string } }[] };
+  const text = data.choices[0]?.message?.content ?? '';
+
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('Could not parse response from OpenAI.');
+
+  const parsed = JSON.parse(jsonMatch[0]) as { tags: string[]; strategy: string };
+  const tags: TagResult[] = parsed.tags.slice(0, TAG_COUNT).map((t: string) => {
+    const tag = t.toLowerCase().trim();
+    return { tag, charCount: tag.length, valid: tag.length <= MAX_CHARS };
+  });
+  return { tags, strategy: parsed.strategy ?? '' };
+}
+
+async function callAI(
+  title: string,
+  description: string,
+  category: string,
+  provider: ProviderId,
+  apiKey: string,
+): Promise<AnalysisResult> {
+  if (provider === 'gemini') return callGemini(title, description, category, apiKey);
+  if (provider === 'openai') return callOpenAI(title, description, category, apiKey);
+  return callClaude(title, description, category, apiKey);
+}
+
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function CharBar({ count }: { count: number }) {
@@ -320,7 +404,7 @@ export function EtsySeoTool() {
       if (!listingTitle.trim()) throw new Error('Could not find a listing title. Try Manual Entry mode.');
 
       setStatus('analyzing');
-      const analysisResult = await callClaude(listingTitle, listingDesc, category, keys[activeProvider]);
+      const analysisResult = await callAI(listingTitle, listingDesc, category, activeProvider, keys[activeProvider]);
       setResult(analysisResult);
       setStatus('done');
     } catch (e) {
