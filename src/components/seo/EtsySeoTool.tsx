@@ -24,7 +24,20 @@ type Status = 'idle' | 'fetching' | 'analyzing' | 'done' | 'error';
 
 const MAX_CHARS = 20;
 const TAG_COUNT = 13;
-const MODEL = 'claude-haiku-4-5-20251001';
+type ProviderId = 'claude' | 'gemini' | 'openai';
+
+interface ProviderConfig {
+  id: ProviderId;
+  label: string;
+  storageKey: string;
+  model: string;
+}
+
+const PROVIDERS: ProviderConfig[] = [
+  { id: 'claude',  label: 'Claude',  storageKey: 'anthropic_api_key', model: 'claude-haiku-4-5-20251001' },
+  { id: 'gemini',  label: 'Gemini',  storageKey: 'google_api_key',    model: 'gemini-3-flash-preview' },
+  { id: 'openai',  label: 'OpenAI',  storageKey: 'openai_api_key',    model: 'gpt-4o-mini' },
+];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -124,7 +137,7 @@ async function callClaude(
       'anthropic-dangerous-direct-browser-access': 'true',
     },
     body: JSON.stringify({
-      model: MODEL,
+      model: PROVIDERS.find((p) => p.id === 'claude')!.model,
       max_tokens: 1024,
       messages: [{ role: 'user', content: buildPrompt(title, description, category) }],
     }),
