@@ -309,6 +309,75 @@ async function callAI(
   throw new Error(`Unknown provider: ${provider}`);
 }
 
+async function generateDescriptionText(
+  title: string,
+  description: string,
+  category: string,
+  provider: ProviderId,
+  apiKey: string,
+): Promise<string> {
+  const { model } = PROVIDERS.find((p) => p.id === provider)!;
+  const prompt = buildDescriptionPrompt(title, description, category);
+
+  if (provider === 'claude') {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 1024,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({})) as { error?: { message?: string } };
+      throw new Error(err.error?.message ?? `Claude API error ${res.status}`);
+    }
+    const data = await res.json() as { content: { text: string }[] };
+    return data.content[0]?.text?.trim() ?? '';
+  }
+
+  if (provider === 'gemini') {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({})) as { error?: { message?: string } };
+      throw new Error(err.error?.message ?? `Gemini API error ${res.status}`);
+    }
+    const data = await res.json() as { candidates: { content: { parts: { text: string }[] } }[] };
+    return data.candidates[0]?.content?.parts[0]?.text?.trim() ?? '';
+  }
+
+  if (provider === 'openai') {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model,
+        max_tokens: 1024,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({})) as { error?: { message?: string } };
+      throw new Error(err.error?.message ?? `OpenAI API error ${res.status}`);
+    }
+    const data = await res.json() as { choices: { message: { content: string } }[] };
+    return data.choices[0]?.message?.content?.trim() ?? '';
+  }
+
+  throw new Error(`Unknown provider: ${provider}`);
+}
+
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function CharBar({ count }: { count: number }) {
