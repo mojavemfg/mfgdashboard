@@ -2,7 +2,7 @@ import { LayoutDashboard, PackageSearch, ShoppingCart, BarChart2 } from 'lucide-
 
 type View = 'dashboard' | 'inventory' | 'orders' | 'charts';
 
-interface SidebarProps {
+interface BottomNavProps {
   activeView: View;
   onViewChange: (view: View) => void;
 }
@@ -10,27 +10,25 @@ interface SidebarProps {
 const navItems: { id: View; label: string; Icon: React.ComponentType<{ size?: number; className?: string }> }[] = [
   { id: 'dashboard', label: 'Dashboard', Icon: LayoutDashboard },
   { id: 'inventory', label: 'Inventory', Icon: PackageSearch },
-  { id: 'orders', label: 'Purchase Orders', Icon: ShoppingCart },
+  { id: 'orders', label: 'Orders', Icon: ShoppingCart },
   { id: 'charts', label: 'Analytics', Icon: BarChart2 },
 ];
 
-export function Sidebar({ activeView, onViewChange }: SidebarProps) {
+export function BottomNav({ activeView, onViewChange }: BottomNavProps) {
   return (
-    <nav className="hidden md:flex w-52 bg-slate-900/60 border-r border-slate-700/60 flex-col pt-3 pb-4 shrink-0 gap-0.5 px-2">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 backdrop-blur border-t border-slate-700/60 flex">
       {navItems.map(({ id, label, Icon }) => {
         const active = activeView === id;
         return (
           <button
             key={id}
             onClick={() => onViewChange(id)}
-            className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-all text-left w-full cursor-pointer border-none rounded-lg ${
-              active
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/30'
-                : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+            className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 transition-colors cursor-pointer border-none bg-transparent ${
+              active ? 'text-blue-400' : 'text-slate-500'
             }`}
           >
-            <Icon size={17} className={active ? 'text-blue-200' : ''} />
-            {label}
+            <Icon size={20} />
+            <span className="text-[10px] font-medium">{label}</span>
           </button>
         );
       })}

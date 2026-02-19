@@ -7,7 +7,6 @@ import {
   Tooltip,
   ReferenceLine,
   CartesianGrid,
-  Legend,
 } from 'recharts';
 import type { ConsumptionRecord } from '@/types';
 
@@ -28,46 +27,52 @@ export function ConsumptionTrendChart({
     .filter((r) => r.componentId === componentId)
     .sort((a, b) => a.date.localeCompare(b.date))
     .map((r) => ({
-      date: r.date.slice(5), // MM-DD
-      fullDate: r.date,
+      date: r.date.slice(5),
       consumed: r.unitsConsumed,
     }));
 
-  // Show every 10th tick label to avoid crowding
-  const tickIndices = new Set(data.filter((_, i) => i % 10 === 0).map((d) => d.date));
+  const tickIndices = new Set(data.filter((_, i) => i % 15 === 0).map((d) => d.date));
 
   return (
-    <div className="bg-slate-800 rounded-xl border border-slate-700 p-4">
-      <p className="text-slate-300 text-sm font-medium mb-4">{componentName} — 90-Day Consumption</p>
-      <ResponsiveContainer width="100%" height={260}>
-        <LineChart data={data} margin={{ top: 5, right: 16, left: 0, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+    <div className="bg-slate-800/60 rounded-xl border border-slate-700/50 p-4">
+      <p className="text-slate-300 text-sm font-semibold mb-1">{componentName}</p>
+      <p className="text-slate-500 text-xs mb-4">90-day consumption · avg {avgDaily.toFixed(1)} units/day</p>
+      <ResponsiveContainer width="100%" height={220}>
+        <LineChart data={data} margin={{ top: 4, right: 8, left: -8, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
           <XAxis
             dataKey="date"
-            tick={{ fill: '#94a3b8', fontSize: 10 }}
+            tick={{ fill: '#64748b', fontSize: 10 }}
             tickFormatter={(v) => (tickIndices.has(v) ? v : '')}
+            axisLine={false}
+            tickLine={false}
           />
-          <YAxis tick={{ fill: '#94a3b8', fontSize: 11 }} width={40} />
+          <YAxis
+            tick={{ fill: '#64748b', fontSize: 10 }}
+            width={36}
+            axisLine={false}
+            tickLine={false}
+          />
           <Tooltip
-            contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: 8 }}
-            labelStyle={{ color: '#cbd5e1', fontSize: 12 }}
+            contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: 10, fontSize: 12 }}
+            labelStyle={{ color: '#94a3b8' }}
             itemStyle={{ color: '#60a5fa' }}
             formatter={(value: number | undefined) => [value != null ? value.toFixed(1) : '—', 'Units']}
           />
-          <Legend wrapperStyle={{ color: '#94a3b8', fontSize: 12 }} />
           <ReferenceLine
             y={avgDaily}
             stroke="#f59e0b"
-            strokeDasharray="5 5"
-            label={{ value: `Avg ${avgDaily.toFixed(1)}/day`, fill: '#f59e0b', fontSize: 10, position: 'insideTopRight' }}
+            strokeDasharray="4 4"
+            strokeWidth={1.5}
+            label={{ value: `avg`, fill: '#f59e0b', fontSize: 9, position: 'insideTopRight' }}
           />
           <Line
             type="monotone"
             dataKey="consumed"
-            stroke="#60a5fa"
+            stroke="#3b82f6"
             strokeWidth={1.5}
             dot={false}
-            name="Units Consumed"
+            activeDot={{ r: 3, fill: '#60a5fa' }}
           />
         </LineChart>
       </ResponsiveContainer>

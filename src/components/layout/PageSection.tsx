@@ -8,8 +8,8 @@ interface PageSectionProps {
 
 export function PageSection({ title, children, className = '' }: PageSectionProps) {
   return (
-    <section className={`mb-6 ${className}`}>
-      <h2 className="text-slate-200 font-semibold text-base mb-3">{title}</h2>
+    <section className={`mb-5 sm:mb-7 ${className}`}>
+      <h2 className="text-slate-300 font-semibold text-sm uppercase tracking-wider mb-3">{title}</h2>
       {children}
     </section>
   );

@@ -42,7 +42,7 @@ export function OrdersView() {
     <div>
       <OrdersFilters filters={filters} suppliers={suppliers} onChange={setFilters} />
       <OrdersTable orders={filtered} components={components} />
-      <p className="text-slate-500 text-xs mt-2">Showing {filtered.length} of {purchaseOrders.length} orders</p>
+      <p className="text-slate-600 text-xs mt-2">Showing {filtered.length} of {purchaseOrders.length} orders</p>
     </div>
   );
 }
