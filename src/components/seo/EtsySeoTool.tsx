@@ -139,6 +139,7 @@ async function callClaude(
   description: string,
   category: string,
   apiKey: string,
+  model: string,
 ): Promise<AnalysisResult> {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -149,7 +150,7 @@ async function callClaude(
       'anthropic-dangerous-direct-browser-access': 'true',
     },
     body: JSON.stringify({
-      model: PROVIDERS[0].model,
+      model: model,
       max_tokens: 1024,
       messages: [{ role: 'user', content: buildPrompt(title, description, category) }],
     }),
@@ -182,8 +183,9 @@ async function callGemini(
   description: string,
   category: string,
   apiKey: string,
+  model: string,
 ): Promise<AnalysisResult> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${PROVIDERS[1].model}:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -216,6 +218,7 @@ async function callOpenAI(
   description: string,
   category: string,
   apiKey: string,
+  model: string,
 ): Promise<AnalysisResult> {
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -224,7 +227,7 @@ async function callOpenAI(
       'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: PROVIDERS[2].model,
+      model: model,
       max_tokens: 1024,
       messages: [{ role: 'user', content: buildPrompt(title, description, category) }],
     }),
@@ -256,9 +259,11 @@ async function callAI(
   provider: ProviderId,
   apiKey: string,
 ): Promise<AnalysisResult> {
-  if (provider === 'claude') return callClaude(title, description, category, apiKey);
-  if (provider === 'gemini') return callGemini(title, description, category, apiKey);
-  if (provider === 'openai') return callOpenAI(title, description, category, apiKey);
+  const providerConfig = PROVIDERS.find((p) => p.id === provider)!;
+  const model = providerConfig.model;
+  if (provider === 'claude') return callClaude(title, description, category, apiKey, model);
+  if (provider === 'gemini') return callGemini(title, description, category, apiKey, model);
+  if (provider === 'openai') return callOpenAI(title, description, category, apiKey, model);
   throw new Error(`Unknown provider: ${provider}`);
 }
 
