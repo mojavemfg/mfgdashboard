@@ -24,7 +24,7 @@ type Status = 'idle' | 'fetching' | 'analyzing' | 'done' | 'error';
 
 const MAX_CHARS = 20;
 const TAG_COUNT = 13;
-const MODEL = 'claude-sonnet-4-6';
+const MODEL = 'claude-haiku-4-5-20251001';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
