@@ -566,7 +566,7 @@ export function EtsySeoTool() {
               className={inputCls}
             />
             <p className="text-slate-400 text-xs">
-              We'll auto-fetch the listing title and description, then Claude will generate tags.
+              We'll auto-fetch the listing title and description, then AI will generate tags.
             </p>
           </div>
         ) : (
@@ -619,7 +619,9 @@ export function EtsySeoTool() {
           {isLoading ? (
             <>
               <RefreshCw size={16} className="animate-spin" />
-              {status === 'fetching' ? 'Reading listing…' : 'Generating tags with Claude…'}
+              {status === 'fetching'
+              ? 'Reading listing…'
+              : `Generating tags with ${PROVIDERS.find((p) => p.id === activeProvider)!.label}…`}
             </>
           ) : (
             <>
@@ -631,7 +633,7 @@ export function EtsySeoTool() {
 
         {!hasKey && (
           <p className="mt-2.5 text-center text-xs text-slate-400">
-            Add your Claude API key above to get started.
+            Add your {PROVIDERS.find((p) => p.id === activeProvider)!.label} API key above to get started.
           </p>
         )}
       </div>
