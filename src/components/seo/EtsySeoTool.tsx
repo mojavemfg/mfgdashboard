@@ -171,7 +171,7 @@ async function callGemini(
   category: string,
   apiKey: string,
 ): Promise<AnalysisResult> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${PROVIDERS[1].model}:generateContent?key=${apiKey}`;
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -212,7 +212,7 @@ async function callOpenAI(
       'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: PROVIDERS[2].model,
       max_tokens: 1024,
       messages: [{ role: 'user', content: buildPrompt(title, description, category) }],
     }),
@@ -244,9 +244,10 @@ async function callAI(
   provider: ProviderId,
   apiKey: string,
 ): Promise<AnalysisResult> {
+  if (provider === 'claude') return callClaude(title, description, category, apiKey);
   if (provider === 'gemini') return callGemini(title, description, category, apiKey);
   if (provider === 'openai') return callOpenAI(title, description, category, apiKey);
-  return callClaude(title, description, category, apiKey);
+  throw new Error(`Unknown provider: ${provider}`);
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
