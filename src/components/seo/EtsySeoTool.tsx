@@ -82,6 +82,34 @@ Respond ONLY with valid JSON, no other text:
 {"tags":["tag one","tag two","tag three","tag four","tag five","tag six","tag seven","tag eight","tag nine","tag ten","tag eleven","tag twelve","tag thirteen"],"strategy":"One sentence describing the multi-angle tag strategy used."}`;
 }
 
+function buildDescriptionPrompt(title: string, description: string, category: string): string {
+  return `You are a world-class Etsy copywriter who specializes in high-converting listing descriptions.
+
+Write a listing description for this Etsy product that maximizes conversion.
+
+LISTING:
+Title: ${title}
+${description ? `Existing description: ${description}` : ''}
+${category ? `Category: ${category}` : ''}
+
+FORMAT — output exactly this structure, plain text only (no markdown, no bold, no headers):
+
+[Hook paragraph — 2-3 sentences. Address the buyer directly. Lead with the single most compelling benefit or use case. This is the ONLY text buyers see before "Show full description" so it must hook immediately.]
+
+• [Key feature, material, or spec]
+• [Key feature, material, or spec]
+• [Key feature, material, or spec]
+• [Key feature, material, or spec]
+
+[One closing sentence CTA — e.g. "Order today and it ships within 2-3 business days."]
+
+RULES:
+- Plain text only — no asterisks, no markdown bold/italic, no headers
+- Hook must be conversational and specific, not generic ("beautiful" and "perfect" are banned)
+- Bullets cover: what it's made of, dimensions if known, use case, gifting angle
+- Tone: warm, confident, direct`;
+}
+
 /** Extract listing ID and title slug directly from the URL — works 100% of the time */
 function parseEtsyUrl(listingUrl: string): { listingId: string; title: string } | null {
   const match = listingUrl.match(/etsy\.com\/listing\/(\d+)\/([a-z0-9-]+)/i);
