@@ -115,6 +115,20 @@ function extractMetaFromHtml(html: string): { title: string; description: string
 async function fetchListingMeta(
   listingUrl: string,
 ): Promise<{ title: string; description: string; source: 'proxy' | 'slug' }> {
+  // Try server-side proxy first (bypasses CORS, uses real browser headers)
+  try {
+    const res = await fetch(`/api/fetch-listing?url=${encodeURIComponent(listingUrl)}`, {
+      signal: AbortSignal.timeout(10000),
+    });
+    if (res.ok) {
+      const data = await res.json() as { title?: string; description?: string };
+      if (data.title) return { title: data.title, description: data.description ?? '', source: 'proxy' };
+    }
+  } catch {
+    // fall through to public proxies
+  }
+
+  // Try public CORS proxies
   for (const buildProxy of PROXY_BUILDERS) {
     try {
       const res = await fetch(buildProxy(listingUrl), { signal: AbortSignal.timeout(8000) });
@@ -647,7 +661,15 @@ export function EtsySeoTool() {
       {fetchNote && status !== 'error' && (
         <div className="mb-4 flex items-start gap-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-700/50 rounded-xl px-4 py-3">
           <AlertCircle size={15} className="text-amber-500 shrink-0 mt-0.5" />
-          <p className="text-amber-700 dark:text-amber-400 text-xs leading-relaxed">{fetchNote}</p>
+          <div className="flex-1">
+            <p className="text-amber-700 dark:text-amber-400 text-xs leading-relaxed">{fetchNote}</p>
+            <button
+              onClick={() => setMode('manual')}
+              className="mt-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400 underline underline-offset-2 cursor-pointer border-none bg-transparent p-0 hover:text-amber-900 dark:hover:text-amber-200 transition-colors"
+            >
+              Switch to Manual Entry →
+            </button>
+          </div>
         </div>
       )}
 
