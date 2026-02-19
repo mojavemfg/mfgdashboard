@@ -15,19 +15,18 @@ type View = 'dashboard' | 'inventory' | 'orders' | 'charts';
 
 interface DashboardProps {
   activeView: View;
+  isDark: boolean;
 }
 
-export function Dashboard({ activeView }: DashboardProps) {
+export function Dashboard({ activeView, isDark }: DashboardProps) {
   const metrics = useInventoryMetrics();
   const { enrichedComponents } = metrics;
   const [selectedChartCompId, setSelectedChartCompId] = useState(enrichedComponents[0]?.id ?? '');
-
   const selectedComp = enrichedComponents.find((c) => c.id === selectedChartCompId);
 
   return (
-    <main className="flex-1 overflow-y-auto bg-slate-950">
-      {/* Gradient wash at top */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-blue-950/20 to-transparent" />
+    <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-blue-100/60 dark:from-blue-950/20 to-transparent" />
 
       <div className="relative px-4 sm:px-6 pt-5 pb-24 md:pb-8">
         {activeView === 'dashboard' && (
@@ -60,12 +59,8 @@ export function Dashboard({ activeView }: DashboardProps) {
           <>
             <PageSection title="Consumption Trend">
               <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className="text-slate-400 text-sm">Component:</span>
-                <ChartComponentSelector
-                  components={enrichedComponents}
-                  selectedId={selectedChartCompId}
-                  onChange={setSelectedChartCompId}
-                />
+                <span className="text-slate-500 dark:text-slate-400 text-sm">Component:</span>
+                <ChartComponentSelector components={enrichedComponents} selectedId={selectedChartCompId} onChange={setSelectedChartCompId} />
               </div>
               {selectedComp && (
                 <ConsumptionTrendChart
@@ -73,11 +68,12 @@ export function Dashboard({ activeView }: DashboardProps) {
                   componentName={selectedComp.name}
                   records={consumptionRecords}
                   avgDaily={selectedComp.avgDailyConsumption}
+                  isDark={isDark}
                 />
               )}
             </PageSection>
             <PageSection title="Inventory Level Analysis">
-              <InventoryLevelChart components={enrichedComponents} />
+              <InventoryLevelChart components={enrichedComponents} isDark={isDark} />
             </PageSection>
           </>
         )}
