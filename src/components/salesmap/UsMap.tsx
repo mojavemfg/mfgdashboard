@@ -63,7 +63,7 @@ export function UsMap({ stats, isDark }: UsMapProps) {
                   fill={choroplethColor(count, max, isDark)}
                   stroke={strokeColor}
                   strokeWidth={0.5}
-                  style={{ outline: 'none' }}
+                  style={{ default: { outline: 'none' }, hover: { outline: 'none' }, pressed: { outline: 'none' } }}
                   onMouseEnter={(evt) =>
                     setTooltip({ x: evt.clientX, y: evt.clientY, name, count, revenue: stat?.revenue ?? 0 })
                   }

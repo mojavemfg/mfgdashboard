@@ -12,6 +12,7 @@ import { InventoryLevelChart } from '@/components/charts/InventoryLevelChart';
 import { ChartComponentSelector } from '@/components/charts/ChartComponentSelector';
 import { PageSection } from '@/components/layout/PageSection';
 import { EtsySeoTool } from '@/components/seo/EtsySeoTool';
+import { SalesMapView } from '@/components/salesmap/SalesMapView';
 
 interface DashboardProps {
   activeView: View;
@@ -80,6 +81,10 @@ export function Dashboard({ activeView, isDark }: DashboardProps) {
 
         {activeView === 'seo' && (
           <EtsySeoTool />
+        )}
+
+        {activeView === 'salesmap' && (
+          <SalesMapView isDark={isDark} />
         )}
       </div>
     </main>
