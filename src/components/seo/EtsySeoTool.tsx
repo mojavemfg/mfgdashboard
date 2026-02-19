@@ -57,24 +57,56 @@ Respond ONLY with valid JSON, no other text:
 {"tags":["tag one","tag two","tag three","tag four","tag five","tag six","tag seven","tag eight","tag nine","tag ten","tag eleven","tag twelve","tag thirteen"],"strategy":"One sentence describing the multi-angle tag strategy used."}`;
 }
 
-async function fetchListingMeta(listingUrl: string): Promise<{ title: string; description: string }> {
-  const proxy = `https://corsproxy.io/?url=${encodeURIComponent(listingUrl)}`;
-  const res = await fetch(proxy, { signal: AbortSignal.timeout(12000) });
-  if (!res.ok) throw new Error(`Proxy returned ${res.status}`);
-  const html = await res.text();
-  const doc = new DOMParser().parseFromString(html, 'text/html');
+/** Extract listing ID and title slug directly from the URL — works 100% of the time */
+function parseEtsyUrl(listingUrl: string): { listingId: string; title: string } | null {
+  const match = listingUrl.match(/etsy\.com\/listing\/(\d+)\/([a-z0-9-]+)/i);
+  if (!match) return null;
+  const listingId = match[1];
+  const title = match[2]
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+  return { listingId, title };
+}
 
+const PROXY_BUILDERS: ((url: string) => string)[] = [
+  (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  (url) => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+  (url) => `https://thingproxy.freeboard.io/fetch/${url}`,
+];
+
+function extractMetaFromHtml(html: string): { title: string; description: string } | null {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
   const ogTitle = doc.querySelector('meta[property="og:title"]')?.getAttribute('content') ?? '';
   const ogDesc =
     doc.querySelector('meta[property="og:description"]')?.getAttribute('content') ??
     doc.querySelector('meta[name="description"]')?.getAttribute('content') ??
     '';
+  const title = ogTitle.replace(/\s*[|–\-].*$/, '').trim();
+  return title ? { title, description: ogDesc } : null;
+}
 
-  // Strip "| Etsy" and "- Shop Name" suffixes from title
-  const title = ogTitle.replace(/\s*[|–-].*$/, '').trim();
+/** Try each proxy in sequence; fall back to URL slug extraction if all fail */
+async function fetchListingMeta(
+  listingUrl: string,
+): Promise<{ title: string; description: string; source: 'proxy' | 'slug' }> {
+  for (const buildProxy of PROXY_BUILDERS) {
+    try {
+      const res = await fetch(buildProxy(listingUrl), { signal: AbortSignal.timeout(8000) });
+      if (!res.ok) continue;
+      const html = await res.text();
+      const meta = extractMetaFromHtml(html);
+      if (meta) return { ...meta, source: 'proxy' };
+    } catch {
+      // try next proxy
+    }
+  }
 
-  if (!title) throw new Error('Could not extract listing title from page.');
-  return { title, description: ogDesc };
+  // All proxies failed — extract title from the URL slug itself
+  const parsed = parseEtsyUrl(listingUrl);
+  if (parsed) return { title: parsed.title, description: '', source: 'slug' };
+
+  throw new Error('Could not parse listing URL. Make sure it\'s a full etsy.com/listing/... link.');
 }
 
 async function callClaude(
@@ -188,6 +220,7 @@ export function EtsySeoTool() {
   const [showKeyPanel, setShowKeyPanel] = useState(false);
   const [status, setStatus] = useState<Status>('idle');
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [fetchNote, setFetchNote] = useState('');
   const [error, setError] = useState('');
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
   const [copiedAll, setCopiedAll] = useState(false);
@@ -232,6 +265,7 @@ export function EtsySeoTool() {
     if (!canAnalyze) return;
     setError('');
     setResult(null);
+    setFetchNote('');
 
     try {
       let listingTitle = title;
@@ -245,9 +279,12 @@ export function EtsySeoTool() {
         const meta = await fetchListingMeta(url);
         listingTitle = meta.title;
         listingDesc = meta.description;
-        // Pre-fill manual fields for transparency
+        // Pre-fill manual fields so user can see / edit what we found
         setTitle(meta.title);
         setDescription(meta.description);
+        if (meta.source === 'slug') {
+          setFetchNote('Etsy blocked direct fetch — title extracted from URL. For richer tags, switch to Manual Entry and paste your full description.');
+        }
       }
 
       if (!listingTitle.trim()) throw new Error('Could not find a listing title. Try Manual Entry mode.');
@@ -422,7 +459,7 @@ export function EtsySeoTool() {
           {isLoading ? (
             <>
               <RefreshCw size={16} className="animate-spin" />
-              {status === 'fetching' ? 'Fetching listing…' : 'Generating tags with Claude…'}
+              {status === 'fetching' ? 'Reading listing…' : 'Generating tags with Claude…'}
             </>
           ) : (
             <>
@@ -438,6 +475,14 @@ export function EtsySeoTool() {
           </p>
         )}
       </div>
+
+      {/* Fetch fallback note */}
+      {fetchNote && status !== 'error' && (
+        <div className="mb-4 flex items-start gap-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-700/50 rounded-xl px-4 py-3">
+          <AlertCircle size={15} className="text-amber-500 shrink-0 mt-0.5" />
+          <p className="text-amber-700 dark:text-amber-400 text-xs leading-relaxed">{fetchNote}</p>
+        </div>
+      )}
 
       {/* Error */}
       {status === 'error' && error && (
