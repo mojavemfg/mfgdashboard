@@ -457,6 +457,10 @@ export function EtsySeoTool() {
   const [error, setError] = useState('');
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
   const [copiedAll, setCopiedAll] = useState(false);
+  const [descStatus, setDescStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
+  const [refinedDescription, setRefinedDescription] = useState('');
+  const [descError, setDescError] = useState('');
+  const [copiedDesc, setCopiedDesc] = useState(false);
 
   const hasKey = keys[activeProvider].trim().length > 0;
   const canAnalyze =
@@ -502,6 +506,12 @@ export function EtsySeoTool() {
     setTimeout(() => setCopiedAll(false), 2000);
   }
 
+  async function copyDescription() {
+    await navigator.clipboard.writeText(refinedDescription);
+    setCopiedDesc(true);
+    setTimeout(() => setCopiedDesc(false), 2000);
+  }
+
   async function analyze() {
     if (!canAnalyze) return;
     setError('');
@@ -537,6 +547,39 @@ export function EtsySeoTool() {
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong.');
       setStatus('error');
+    }
+  }
+
+  async function generateDescription() {
+    if (!canAnalyze) return;
+    setDescError('');
+    setDescStatus('loading');
+
+    try {
+      let listingTitle = title;
+      let listingDesc = description;
+
+      if (mode === 'url') {
+        if (!url.includes('etsy.com')) {
+          throw new Error('Please enter a valid Etsy listing URL (etsy.com/listing/...)');
+        }
+        if (!listingTitle.trim()) {
+          const meta = await fetchListingMeta(url);
+          listingTitle = meta.title;
+          listingDesc = meta.description;
+          setTitle(meta.title);
+          setDescription(meta.description);
+        }
+      }
+
+      if (!listingTitle.trim()) throw new Error('Could not find a listing title. Try Manual Entry mode.');
+
+      const text = await generateDescriptionText(listingTitle, listingDesc, category, activeProvider, keys[activeProvider]);
+      setRefinedDescription(text);
+      setDescStatus('done');
+    } catch (e) {
+      setDescError(e instanceof Error ? e.message : 'Something went wrong.');
+      setDescStatus('error');
     }
   }
 
@@ -747,6 +790,24 @@ export function EtsySeoTool() {
           )}
         </button>
 
+        <button
+          onClick={() => { void generateDescription(); }}
+          disabled={!canAnalyze || descStatus === 'loading'}
+          className="mt-2 w-full flex items-center justify-center gap-2.5 py-3 bg-slate-700 hover:bg-slate-800 dark:bg-slate-700/80 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors cursor-pointer border-none text-sm shadow-sm"
+        >
+          {descStatus === 'loading' ? (
+            <>
+              <RefreshCw size={16} className="animate-spin" />
+              {`Writing description with ${PROVIDERS.find((p) => p.id === activeProvider)!.label}…`}
+            </>
+          ) : (
+            <>
+              <PenLine size={16} />
+              {refinedDescription ? 'Regenerate Description' : 'Generate Description'}
+            </>
+          )}
+        </button>
+
         {!hasKey && (
           <p className="mt-2.5 text-center text-xs text-slate-400">
             Add your {PROVIDERS.find((p) => p.id === activeProvider)!.label} API key above to get started.
@@ -782,6 +843,17 @@ export function EtsySeoTool() {
                 Tip: Switch to <strong>Manual Entry</strong> mode and paste the listing details directly.
               </p>
             ) : null}
+          </div>
+        </div>
+      )}
+
+      {/* Description error */}
+      {descStatus === 'error' && descError && (
+        <div className="mb-4 flex items-start gap-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/50 rounded-xl px-4 py-3.5">
+          <AlertCircle size={16} className="text-red-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-red-700 dark:text-red-400 text-sm font-medium">Description generation failed</p>
+            <p className="text-red-600 dark:text-red-500 text-xs mt-0.5">{descError}</p>
           </div>
         </div>
       )}
@@ -847,6 +919,37 @@ export function EtsySeoTool() {
                 {label}
               </span>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Refined Description result */}
+      {descStatus === 'done' && refinedDescription && (
+        <div className="mt-4 bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-none p-4 sm:p-5">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <PenLine size={15} className="text-purple-500" />
+              <span className="text-slate-700 dark:text-slate-300 text-sm font-semibold">Refined Description</span>
+            </div>
+            <button
+              onClick={() => { void copyDescription(); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium rounded-lg transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
+            >
+              {copiedDesc ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
+              {copiedDesc ? 'Copied!' : 'Copy'}
+            </button>
+          </div>
+          <textarea
+            rows={8}
+            value={refinedDescription}
+            onChange={(e) => setRefinedDescription(e.target.value)}
+            className={`${inputCls} resize-y`}
+          />
+          <div className="flex items-center gap-2 mt-2.5">
+            <Sparkles size={12} className="text-purple-400 shrink-0" />
+            <p className="text-slate-400 text-[11px]">
+              Optimized for Etsy's above-the-fold hook — edit freely before copying to your listing.
+            </p>
           </div>
         </div>
       )}
