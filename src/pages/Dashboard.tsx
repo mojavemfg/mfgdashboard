@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useInventoryMetrics } from '@/hooks/useInventoryMetrics';
 import { consumptionRecords } from '@/data';
+import type { View } from '@/App';
 
 import { KpiCardGrid } from '@/components/kpi/KpiCardGrid';
 import { ReorderAlertsPanel } from '@/components/alerts/ReorderAlertsPanel';
@@ -10,8 +11,7 @@ import { ConsumptionTrendChart } from '@/components/charts/ConsumptionTrendChart
 import { InventoryLevelChart } from '@/components/charts/InventoryLevelChart';
 import { ChartComponentSelector } from '@/components/charts/ChartComponentSelector';
 import { PageSection } from '@/components/layout/PageSection';
-
-type View = 'dashboard' | 'inventory' | 'orders' | 'charts';
+import { EtsySeoTool } from '@/components/seo/EtsySeoTool';
 
 interface DashboardProps {
   activeView: View;
@@ -76,6 +76,10 @@ export function Dashboard({ activeView, isDark }: DashboardProps) {
               <InventoryLevelChart components={enrichedComponents} isDark={isDark} />
             </PageSection>
           </>
+        )}
+
+        {activeView === 'seo' && (
+          <EtsySeoTool />
         )}
       </div>
     </main>

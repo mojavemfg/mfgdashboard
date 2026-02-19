@@ -6,7 +6,7 @@ import { Dashboard } from '@/pages/Dashboard';
 import { useInventoryMetrics } from '@/hooks/useInventoryMetrics';
 import { useTheme } from '@/hooks/useTheme';
 
-type View = 'dashboard' | 'inventory' | 'orders' | 'charts';
+export type View = 'dashboard' | 'inventory' | 'orders' | 'charts' | 'seo';
 
 function App() {
   const [activeView, setActiveView] = useState<View>('dashboard');

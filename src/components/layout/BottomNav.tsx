@@ -1,6 +1,5 @@
-import { LayoutDashboard, PackageSearch, ShoppingCart, BarChart2 } from 'lucide-react';
-
-type View = 'dashboard' | 'inventory' | 'orders' | 'charts';
+import { LayoutDashboard, PackageSearch, ShoppingCart, BarChart2, Tag } from 'lucide-react';
+import type { View } from '@/App';
 
 interface BottomNavProps {
   activeView: View;
@@ -12,6 +11,7 @@ const navItems: { id: View; label: string; Icon: React.ComponentType<{ size?: nu
   { id: 'inventory', label: 'Inventory', Icon: PackageSearch },
   { id: 'orders', label: 'Orders', Icon: ShoppingCart },
   { id: 'charts', label: 'Analytics', Icon: BarChart2 },
+  { id: 'seo', label: 'Etsy SEO', Icon: Tag },
 ];
 
 export function BottomNav({ activeView, onViewChange }: BottomNavProps) {
@@ -19,16 +19,19 @@ export function BottomNav({ activeView, onViewChange }: BottomNavProps) {
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t border-slate-200 dark:border-slate-700/60 flex">
       {navItems.map(({ id, label, Icon }) => {
         const active = activeView === id;
+        const isSeo = id === 'seo';
         return (
           <button
             key={id}
             onClick={() => onViewChange(id)}
-            className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 transition-colors cursor-pointer border-none bg-transparent ${
-              active ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500'
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 transition-colors cursor-pointer border-none bg-transparent ${
+              active
+                ? isSeo ? 'text-orange-500 dark:text-orange-400' : 'text-blue-600 dark:text-blue-400'
+                : 'text-slate-400 dark:text-slate-500'
             }`}
           >
-            <Icon size={20} />
-            <span className="text-[10px] font-medium">{label}</span>
+            <Icon size={19} />
+            <span className="text-[9px] font-medium">{label}</span>
           </button>
         );
       })}
