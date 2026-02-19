@@ -228,7 +228,14 @@ export function EtsySeoTool() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem('anthropic_api_key') ?? '');
+  const [activeProvider, setActiveProvider] = useState<ProviderId>(
+    () => (localStorage.getItem('active_seo_provider') as ProviderId) ?? 'claude'
+  );
+  const [keys, setKeys] = useState<Record<ProviderId, string>>(() => ({
+    claude: localStorage.getItem('anthropic_api_key') ?? '',
+    gemini: localStorage.getItem('google_api_key') ?? '',
+    openai: localStorage.getItem('openai_api_key') ?? '',
+  }));
   const [keyDraft, setKeyDraft] = useState('');
   const [showKeyPanel, setShowKeyPanel] = useState(false);
   const [status, setStatus] = useState<Status>('idle');
@@ -238,7 +245,7 @@ export function EtsySeoTool() {
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
   const [copiedAll, setCopiedAll] = useState(false);
 
-  const hasKey = apiKey.trim().length > 0;
+  const hasKey = keys[activeProvider].trim().length > 0;
   const canAnalyze =
     hasKey &&
     status !== 'fetching' &&
@@ -248,17 +255,27 @@ export function EtsySeoTool() {
   function saveKey() {
     const k = keyDraft.trim();
     if (!k) return;
-    localStorage.setItem('anthropic_api_key', k);
-    setApiKey(k);
+    const provider = PROVIDERS.find((p) => p.id === activeProvider)!;
+    localStorage.setItem(provider.storageKey, k);
+    setKeys((prev) => ({ ...prev, [activeProvider]: k }));
     setKeyDraft('');
     setShowKeyPanel(false);
   }
 
   function clearKey() {
-    localStorage.removeItem('anthropic_api_key');
-    setApiKey('');
+    const provider = PROVIDERS.find((p) => p.id === activeProvider)!;
+    localStorage.removeItem(provider.storageKey);
+    setKeys((prev) => ({ ...prev, [activeProvider]: '' }));
     setKeyDraft('');
   }
+
+  function switchProvider(id: ProviderId) {
+    setActiveProvider(id);
+    localStorage.setItem('active_seo_provider', id);
+    setKeyDraft('');
+  }
+  // switchProvider is wired to provider tabs in a later task; reference prevents noUnusedLocals
+  void switchProvider;
 
   async function copyTag(idx: number) {
     await navigator.clipboard.writeText(result!.tags[idx].tag);
@@ -303,7 +320,7 @@ export function EtsySeoTool() {
       if (!listingTitle.trim()) throw new Error('Could not find a listing title. Try Manual Entry mode.');
 
       setStatus('analyzing');
-      const analysisResult = await callClaude(listingTitle, listingDesc, category, apiKey);
+      const analysisResult = await callClaude(listingTitle, listingDesc, category, keys[activeProvider]);
       setResult(analysisResult);
       setStatus('done');
     } catch (e) {
