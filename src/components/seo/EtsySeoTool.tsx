@@ -269,13 +269,13 @@ export function EtsySeoTool() {
     setKeyDraft('');
   }
 
+  // @ts-expect-error -- wired to provider tab UI in Task 4
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- wired to provider tab UI in Task 4
   function switchProvider(id: ProviderId) {
     setActiveProvider(id);
     localStorage.setItem('active_seo_provider', id);
     setKeyDraft('');
   }
-  // switchProvider is wired to provider tabs in a later task; reference prevents noUnusedLocals
-  void switchProvider;
 
   async function copyTag(idx: number) {
     await navigator.clipboard.writeText(result!.tags[idx].tag);
