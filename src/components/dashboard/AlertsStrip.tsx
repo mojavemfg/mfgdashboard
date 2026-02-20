@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { AlertOctagon, AlertTriangle, CheckCircle2, ShoppingBag } from 'lucide-react';
 import type { View } from '@/App';
 
@@ -9,7 +10,7 @@ interface AlertsStripProps {
 }
 
 interface AlertCardProps {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   value: number;
   accent: 'red' | 'amber';
