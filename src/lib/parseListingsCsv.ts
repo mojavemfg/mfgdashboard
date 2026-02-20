@@ -16,7 +16,7 @@ function splitIntoRecords(text: string): string[] {
     if (ch === '"') {
       // Escaped quote inside a quoted field ("" → ")
       if (inQuotes && next === '"') {
-        current += '"';
+        current += '""'  // preserve raw; splitFields will decode
         i++; // skip next quote
       } else {
         inQuotes = !inQuotes;
