@@ -51,7 +51,7 @@ export function SalesMapView({ isDark, orders, onMerge, onClear }: SalesMapViewP
   return (
     <>
       <PageSection title="Upload">
-        <SalesMapUpload onMerge={onMerge} onClear={onClear} totalOrders={orders.length} />
+        <SalesMapUpload onMerge={onMerge} onClear={onClear} totalItems={orders.length} />
       </PageSection>
 
       {orders.length > 0 ? (

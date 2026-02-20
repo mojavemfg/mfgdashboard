@@ -7,10 +7,10 @@ import type { MergeResult } from '@/hooks/useSalesOrders';
 interface SalesMapUploadProps {
   onMerge: (records: EtsyOrderItem[]) => MergeResult;
   onClear: () => void;
-  totalOrders: number;
+  totalItems: number;
 }
 
-export function SalesMapUpload({ onMerge, onClear, totalOrders }: SalesMapUploadProps) {
+export function SalesMapUpload({ onMerge, onClear, totalItems }: SalesMapUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [lastResult, setLastResult] = useState<MergeResult | null>(null);
@@ -50,8 +50,8 @@ export function SalesMapUpload({ onMerge, onClear, totalOrders }: SalesMapUpload
       >
         <Upload size={16} className="text-slate-400 shrink-0" />
         <span className="text-slate-500 dark:text-slate-400 text-sm">
-          {totalOrders > 0
-            ? `${totalOrders.toLocaleString()} orders loaded — drop another CSV to merge`
+          {totalItems > 0
+            ? `${totalItems.toLocaleString()} items loaded — drop another CSV to merge`
             : 'Drop Etsy sold-orders CSV here, or click to browse'}
         </span>
         {lastResult && (
@@ -68,7 +68,7 @@ export function SalesMapUpload({ onMerge, onClear, totalOrders }: SalesMapUpload
         />
       </div>
 
-      {totalOrders > 0 &&
+      {totalItems > 0 &&
         (confirmClear ? (
           <div className="flex items-center gap-2 shrink-0">
             <span className="text-sm text-slate-500 dark:text-slate-400">Clear all data?</span>
