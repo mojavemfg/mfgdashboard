@@ -2,12 +2,13 @@ import { useState, useMemo } from 'react';
 import { ShoppingBag, Globe, DollarSign } from 'lucide-react';
 import { PageSection } from '@/components/layout/PageSection';
 import { KpiCard } from '@/components/kpi/KpiCard';
-import { useSalesOrders } from '@/hooks/useSalesOrders';
-import { statsByUsState, statsByCountry } from '@/lib/salesMapData';
+import { statsByUsState, statsByCountry, toSaleRecords } from '@/lib/salesMapData';
 import { SalesMapUpload } from './SalesMapUpload';
 import { UsMap } from './UsMap';
 import { WorldMap } from './WorldMap';
 import { SalesBreakdownTables } from './SalesBreakdownTables';
+import type { EtsyOrderItem } from '@/types';
+import type { MergeResult } from '@/hooks/useSalesOrders';
 
 type MapView = 'us' | 'world';
 
@@ -18,10 +19,12 @@ function extractYear(saleDate: string): string {
 
 interface SalesMapViewProps {
   isDark: boolean;
+  orders: EtsyOrderItem[];
+  onMerge: (records: EtsyOrderItem[]) => MergeResult;
+  onClear: () => void;
 }
 
-export function SalesMapView({ isDark }: SalesMapViewProps) {
-  const { orders, merge, clear } = useSalesOrders();
+export function SalesMapView({ isDark, orders, onMerge, onClear }: SalesMapViewProps) {
   const [mapView, setMapView] = useState<MapView>('us');
   const [selectedYear, setSelectedYear] = useState<string>('all');
 
@@ -30,10 +33,13 @@ export function SalesMapView({ isDark }: SalesMapViewProps) {
     return [...years].sort().reverse();
   }, [orders]);
 
-  const filteredOrders = useMemo(
+  const filteredItems = useMemo(
     () => (selectedYear === 'all' ? orders : orders.filter((o) => extractYear(o.saleDate) === selectedYear)),
     [orders, selectedYear]
   );
+
+  // Aggregate to order-level for Sales Map stats (preserves existing map semantics)
+  const filteredOrders = useMemo(() => toSaleRecords(filteredItems), [filteredItems]);
 
   const stateStats = useMemo(() => statsByUsState(filteredOrders), [filteredOrders]);
   const countryStats = useMemo(() => statsByCountry(filteredOrders), [filteredOrders]);
@@ -45,7 +51,7 @@ export function SalesMapView({ isDark }: SalesMapViewProps) {
   return (
     <>
       <PageSection title="Upload">
-        <SalesMapUpload onMerge={merge} onClear={clear} totalOrders={orders.length} />
+        <SalesMapUpload onMerge={onMerge} onClear={onClear} totalOrders={orders.length} />
       </PageSection>
 
       {orders.length > 0 ? (

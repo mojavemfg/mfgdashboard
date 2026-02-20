@@ -1,11 +1,11 @@
 import { useRef, useState } from 'react';
 import { Upload, Trash2 } from 'lucide-react';
 import { parseSalesCsv } from '@/lib/parseSalesCsv';
-import type { SaleRecord } from '@/types';
+import type { EtsyOrderItem } from '@/types';
 import type { MergeResult } from '@/hooks/useSalesOrders';
 
 interface SalesMapUploadProps {
-  onMerge: (records: SaleRecord[]) => MergeResult;
+  onMerge: (records: EtsyOrderItem[]) => MergeResult;
   onClear: () => void;
   totalOrders: number;
 }
