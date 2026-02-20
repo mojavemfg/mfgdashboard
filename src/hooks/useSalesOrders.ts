@@ -1,19 +1,19 @@
 import { useState, useCallback } from 'react';
-import type { SaleRecord } from '@/types';
+import type { EtsyOrderItem } from '@/types';
 
 const STORAGE_KEY = 'salesmap_orders';
 
-function load(): SaleRecord[] {
+function load(): EtsyOrderItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    return JSON.parse(raw) as SaleRecord[];
+    return JSON.parse(raw) as EtsyOrderItem[];
   } catch {
     return [];
   }
 }
 
-function save(records: SaleRecord[]): void {
+function save(records: EtsyOrderItem[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
 }
 
@@ -23,12 +23,12 @@ export interface MergeResult {
 }
 
 export function useSalesOrders() {
-  const [orders, setOrders] = useState<SaleRecord[]>(() => load());
+  const [orders, setOrders] = useState<EtsyOrderItem[]>(() => load());
 
-  const merge = useCallback((incoming: SaleRecord[]): MergeResult => {
+  const merge = useCallback((incoming: EtsyOrderItem[]): MergeResult => {
     const existing = load();
-    const existingIds = new Set(existing.map((r) => r.orderId));
-    const newRecords = incoming.filter((r) => !existingIds.has(r.orderId));
+    const existingIds = new Set(existing.map((r) => r.transactionId));
+    const newRecords = incoming.filter((r) => !existingIds.has(r.transactionId));
     const merged = [...existing, ...newRecords];
     save(merged);
     setOrders(merged);
