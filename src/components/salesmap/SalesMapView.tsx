@@ -11,6 +11,11 @@ import { SalesBreakdownTables } from './SalesBreakdownTables';
 
 type MapView = 'us' | 'world';
 
+function extractYear(saleDate: string): string {
+  const yr = saleDate.split('/')[2] ?? '';
+  return yr.length === 2 ? `20${yr}` : yr;
+}
+
 interface SalesMapViewProps {
   isDark: boolean;
 }
@@ -18,12 +23,23 @@ interface SalesMapViewProps {
 export function SalesMapView({ isDark }: SalesMapViewProps) {
   const { orders, merge, clear } = useSalesOrders();
   const [mapView, setMapView] = useState<MapView>('us');
+  const [selectedYear, setSelectedYear] = useState<string>('all');
 
-  const stateStats = useMemo(() => statsByUsState(orders), [orders]);
-  const countryStats = useMemo(() => statsByCountry(orders), [orders]);
+  const availableYears = useMemo(() => {
+    const years = new Set(orders.map((o) => extractYear(o.saleDate)).filter(Boolean));
+    return [...years].sort().reverse();
+  }, [orders]);
+
+  const filteredOrders = useMemo(
+    () => (selectedYear === 'all' ? orders : orders.filter((o) => extractYear(o.saleDate) === selectedYear)),
+    [orders, selectedYear]
+  );
+
+  const stateStats = useMemo(() => statsByUsState(filteredOrders), [filteredOrders]);
+  const countryStats = useMemo(() => statsByCountry(filteredOrders), [filteredOrders]);
   const totalRevenue = useMemo(
-    () => orders.reduce((sum, o) => sum + o.orderValue, 0),
-    [orders]
+    () => filteredOrders.reduce((sum, o) => sum + o.orderValue, 0),
+    [filteredOrders]
   );
 
   return (
@@ -34,11 +50,31 @@ export function SalesMapView({ isDark }: SalesMapViewProps) {
 
       {orders.length > 0 ? (
         <>
+          {availableYears.length > 1 && (
+            <PageSection title="Filter by Year">
+              <div className="flex flex-wrap gap-2">
+                {(['all', ...availableYears] as const).map((yr) => (
+                  <button
+                    key={yr}
+                    onClick={() => setSelectedYear(yr)}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer border-none ${
+                      selectedYear === yr
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                    }`}
+                  >
+                    {yr === 'all' ? 'All Years' : yr}
+                  </button>
+                ))}
+              </div>
+            </PageSection>
+          )}
+
           <PageSection title="Summary">
             <div className="grid grid-cols-3 gap-3 sm:gap-4">
               <KpiCard
                 label="Total Orders"
-                value={orders.length.toLocaleString()}
+                value={filteredOrders.length.toLocaleString()}
                 icon={<ShoppingBag size={18} />}
                 accent="blue"
               />
