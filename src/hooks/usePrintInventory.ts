@@ -21,7 +21,11 @@ function load(): PrintItem[] {
 }
 
 function save(items: PrintItem[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  } catch {
+    console.warn('[usePrintInventory] localStorage write failed - data not persisted');
+  }
 }
 
 function generateId(): string {
@@ -43,7 +47,7 @@ export function usePrintInventory() {
       const exists = prev.some((i) => i.id === item.id);
       const next = exists
         ? prev.map((i) => (i.id === item.id ? item : i))
-        : [...prev, { ...item, id: generateId() }];
+        : [...prev, { ...item, id: item.id || generateId() }];
       save(next);
       return next;
     });
