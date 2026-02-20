@@ -19,7 +19,7 @@ function scoreTags(tags: string[]): number {
   if (tags.length === 0) return 0;
 
   // Slot fill: how many of 13 slots are used
-  const slotScore = (tags.length / MAX_TAGS) * 100;
+  const slotScore = Math.min(100, (tags.length / MAX_TAGS) * 100);
 
   // Avg char utilization toward 20-char limit
   const avgChars = tags.reduce((sum, t) => sum + t.length, 0) / tags.length;
@@ -35,7 +35,7 @@ function scoreTags(tags: string[]): number {
 function scoreTitle(title: string): number {
   const len = title.length;
   if (len < 20) return 20;
-  if (len < IDEAL_TITLE_MIN) return 20 + ((len - 20) / (IDEAL_TITLE_MIN - 20)) * 50;
+  if (len < IDEAL_TITLE_MIN) return 20 + ((len - 20) / (IDEAL_TITLE_MIN - 20)) * 80;
   if (len <= IDEAL_TITLE_MAX) return 100;
   // Over 140: penalty
   return Math.max(40, 100 - ((len - IDEAL_TITLE_MAX) / 20) * 15);
