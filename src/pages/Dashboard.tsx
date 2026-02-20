@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { useInventoryMetrics } from '@/hooks/useInventoryMetrics';
 import { consumptionRecords } from '@/data';
 import type { View } from '@/App';
+import type { EtsyOrderItem } from '@/types';
+import type { MergeResult } from '@/hooks/useSalesOrders';
 
 import { KpiCardGrid } from '@/components/kpi/KpiCardGrid';
 import { ReorderAlertsPanel } from '@/components/alerts/ReorderAlertsPanel';
 import { InventoryTable } from '@/components/inventory/InventoryTable';
-import { OrdersView } from '@/components/orders/OrdersView';
+import { OrderHistoryView } from '@/components/orders/OrderHistoryView';
 import { ConsumptionTrendChart } from '@/components/charts/ConsumptionTrendChart';
 import { InventoryLevelChart } from '@/components/charts/InventoryLevelChart';
 import { ChartComponentSelector } from '@/components/charts/ChartComponentSelector';
@@ -18,9 +20,12 @@ import { MarginCalculatorView } from '@/components/margin/MarginCalculatorView';
 interface DashboardProps {
   activeView: View;
   isDark: boolean;
+  salesOrders: EtsyOrderItem[];
+  onMergeSalesOrders: (records: EtsyOrderItem[]) => MergeResult;
+  onClearSalesOrders: () => void;
 }
 
-export function Dashboard({ activeView, isDark }: DashboardProps) {
+export function Dashboard({ activeView, isDark, salesOrders, onMergeSalesOrders, onClearSalesOrders }: DashboardProps) {
   const metrics = useInventoryMetrics();
   const { enrichedComponents } = metrics;
   const [selectedChartCompId, setSelectedChartCompId] = useState(enrichedComponents[0]?.id ?? '');
@@ -52,8 +57,12 @@ export function Dashboard({ activeView, isDark }: DashboardProps) {
         )}
 
         {activeView === 'orders' && (
-          <PageSection title="Purchase Orders">
-            <OrdersView />
+          <PageSection title="Order History">
+            <OrderHistoryView
+              orders={salesOrders}
+              onMerge={onMergeSalesOrders}
+              onClear={onClearSalesOrders}
+            />
           </PageSection>
         )}
 
@@ -85,7 +94,12 @@ export function Dashboard({ activeView, isDark }: DashboardProps) {
         )}
 
         {activeView === 'salesmap' && (
-          <SalesMapView isDark={isDark} />
+          <SalesMapView
+            isDark={isDark}
+            orders={salesOrders}
+            onMerge={onMergeSalesOrders}
+            onClear={onClearSalesOrders}
+          />
         )}
 
         {activeView === 'margin' && (
