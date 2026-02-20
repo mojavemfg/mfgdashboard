@@ -20,9 +20,10 @@ interface DashboardProps {
   salesOrders: EtsyOrderItem[];
   onMergeSalesOrders: (records: EtsyOrderItem[]) => MergeResult;
   onClearSalesOrders: () => void;
+  onNavigate: (view: View) => void;
 }
 
-export function Dashboard({ activeView, isDark, salesOrders, onMergeSalesOrders, onClearSalesOrders }: DashboardProps) {
+export function Dashboard({ activeView, isDark, salesOrders, onMergeSalesOrders, onClearSalesOrders, onNavigate }: DashboardProps) {
   const metrics = useInventoryMetrics();
   const { enrichedComponents } = metrics;
 

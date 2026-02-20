@@ -26,6 +26,7 @@ function App() {
           salesOrders={salesOrders}
           onMergeSalesOrders={mergeSalesOrders}
           onClearSalesOrders={clearSalesOrders}
+          onNavigate={setActiveView}
         />
       </div>
       <BottomNav activeView={activeView} onViewChange={setActiveView} />
