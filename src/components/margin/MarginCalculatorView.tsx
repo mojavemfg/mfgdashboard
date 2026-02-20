@@ -16,6 +16,12 @@ export interface HardwareItem {
   cost: number;
 }
 
+export interface PackagingItem {
+  id: string;
+  name: string;
+  cost: number;
+}
+
 export interface ProductPreset {
   id: string;
   name: string;
@@ -24,7 +30,7 @@ export interface ProductPreset {
   printHours: number;
   printerWatts: number;
   kwHRate: number;
-  packagingCost: number;
+  packagingItems: PackagingItem[];
   hardwareItems: HardwareItem[];
 }
 
@@ -93,26 +99,32 @@ export function calcCosts(
     printHours: number;
     printerWatts: number;
     kwHRate: number;
-    packagingCost: number;
+    packagingItems: PackagingItem[];
     hardwareItems: HardwareItem[];
   }
 ) {
   const fil = filaments.find((f) => f.id === state.filamentId);
-  const filamentCost = fil ? (state.filamentGrams / 1000) * fil.costPerKg : 0;
+  const filamentCost    = fil ? (state.filamentGrams / 1000) * fil.costPerKg : 0;
   const electricityCost = state.printHours * (state.printerWatts / 1000) * state.kwHRate;
-  const hardwareCost = state.hardwareItems.reduce((s, h) => s + h.cost, 0);
-  const baseCost = filamentCost + electricityCost + state.packagingCost + hardwareCost + LISTING_FEE;
-  return { filamentCost, electricityCost, hardwareCost, baseCost };
+  const hardwareCost    = state.hardwareItems.reduce((s, h) => s + h.cost, 0);
+  const packagingCost   = state.packagingItems.reduce((s, p) => s + p.cost, 0);
+  const baseCost        = filamentCost + electricityCost + packagingCost + hardwareCost + LISTING_FEE;
+  return { filamentCost, electricityCost, hardwareCost, packagingCost, baseCost };
 }
 
-export function marginFromPrice(baseCost: number, salePrice: number) {
+export function marginFromPrice(baseCost: number, salePrice: number, withEtsy = true) {
   if (salePrice <= 0) return 0;
-  const fees = salePrice * TRANSACTION_RATE + salePrice * PROCESSING_RATE + PROCESSING_FIXED;
-  const profit = salePrice - baseCost - fees;
-  return profit / salePrice;
+  const fees = withEtsy
+    ? salePrice * TRANSACTION_RATE + salePrice * PROCESSING_RATE + PROCESSING_FIXED
+    : 0;
+  return (salePrice - baseCost - fees) / salePrice;
 }
 
-export function priceFromMargin(baseCost: number, targetMargin: number) {
+export function priceFromMargin(baseCost: number, targetMargin: number, withEtsy = true) {
+  if (!withEtsy) {
+    const denom = 1 - targetMargin;
+    return denom <= 0 ? 0 : baseCost / denom;
+  }
   const denom = 1 - TRANSACTION_RATE - PROCESSING_RATE - targetMargin;
   if (denom <= 0) return 0;
   return (baseCost + PROCESSING_FIXED) / denom;
@@ -126,7 +138,7 @@ const BLANK_STATE = {
   printHours: 4,
   printerWatts: 250,
   kwHRate: 0.13,
-  packagingCost: 0.75,
+  packagingItems: [{ id: 'pkg-default', name: 'Box / Mailer', cost: 0.75 }] as PackagingItem[],
   hardwareItems: [] as HardwareItem[],
 };
 
@@ -143,6 +155,7 @@ interface ResultsPanelProps {
   lastEdited: 'price' | 'margin';
   displayMargin: number;
   displayPrice: number;
+  etsyEnabled: boolean;
   onPriceChange: (v: number) => void;
   onMarginChange: (v: number) => void;
 }
@@ -150,13 +163,13 @@ interface ResultsPanelProps {
 function ResultsPanel({
   baseCost, filamentCost, electricityCost, hardwareCost, packagingCost,
   salePrice, targetMargin, lastEdited, displayMargin, displayPrice,
-  onPriceChange, onMarginChange,
+  etsyEnabled, onPriceChange, onMarginChange,
 }: ResultsPanelProps) {
   const activeSalePrice = lastEdited === 'price' ? salePrice : displayPrice;
   const activeMargin    = lastEdited === 'margin' ? targetMargin : displayMargin;
 
   const etsyFees =
-    activeSalePrice > 0
+    etsyEnabled && activeSalePrice > 0
       ? activeSalePrice * TRANSACTION_RATE + activeSalePrice * PROCESSING_RATE + PROCESSING_FIXED
       : 0;
   const profit = activeSalePrice > 0 ? activeSalePrice - baseCost - etsyFees : 0;
@@ -166,7 +179,7 @@ function ResultsPanel({
     { name: 'Electricity', value: electricityCost },
     { name: 'Packaging',   value: packagingCost },
     { name: 'Hardware',    value: hardwareCost },
-    { name: 'Etsy Fees',   value: etsyFees },
+    ...(etsyEnabled && etsyFees > 0 ? [{ name: 'Etsy Fees', value: etsyFees }] : []),
   ];
   const chartData = rawChartData.filter((d) => d.value > 0);
 
@@ -189,21 +202,33 @@ function ResultsPanel({
       {/* Total cost */}
       <div className="flex items-center justify-between mb-4">
         <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Cost</span>
-        <span className="text-lg font-bold text-slate-800 dark:text-slate-200 font-mono tabular-nums">${baseCost.toFixed(3)}</span>
+        <span className="text-lg font-bold text-slate-800 dark:text-slate-200 font-mono tabular-nums">${baseCost.toFixed(2)}</span>
       </div>
 
       {/* Donut chart */}
       {chartData.length > 0 && (
-        <div className="mb-4" style={{ height: 200 }}>
+        <div className="mb-4" style={{ height: 240 }}>
           <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={chartData} innerRadius={60} outerRadius={90} dataKey="value" paddingAngle={2}>
+            <PieChart margin={{ top: 8, right: 16, bottom: 0, left: 16 }}>
+              <Pie
+                data={chartData}
+                innerRadius={55}
+                outerRadius={82}
+                dataKey="value"
+                paddingAngle={2}
+              >
                 {chartData.map((_, i) => (
                   <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip formatter={(v) => `$${Number(v).toFixed(3)}`} />
-              <Legend />
+              <Tooltip
+                formatter={(v) => `$${Number(v).toFixed(2)}`}
+                contentStyle={{ fontSize: '12px', borderRadius: '8px' }}
+              />
+              <Legend
+                wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
+                iconSize={10}
+              />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -261,44 +286,47 @@ function ResultsPanel({
 
 export function MarginCalculatorView() {
   const [filaments, setFilaments] = useState<FilamentPreset[]>(loadFilaments);
-  const [presets, setPresets] = useState<ProductPreset[]>(loadPresets);
+  const [presets, setPresets]     = useState<ProductPreset[]>(loadPresets);
 
   // Working state
-  const [filamentId, setFilamentId] = useState(BLANK_STATE.filamentId);
+  const [filamentId, setFilamentId]       = useState(BLANK_STATE.filamentId);
   const [filamentGrams, setFilamentGrams] = useState(BLANK_STATE.filamentGrams);
-  const [printHours, setPrintHours] = useState(BLANK_STATE.printHours);
-  const [printerWatts, setPrinterWatts] = useState(BLANK_STATE.printerWatts);
-  const [kwHRate, setKwHRate] = useState(BLANK_STATE.kwHRate);
-  const [packagingCost, setPackagingCost] = useState(BLANK_STATE.packagingCost);
-  const [hardwareItems, setHardwareItems] = useState<HardwareItem[]>([]);
+  const [printHours, setPrintHours]       = useState(BLANK_STATE.printHours);
+  const [printerWatts, setPrinterWatts]   = useState(BLANK_STATE.printerWatts);
+  const [kwHRate, setKwHRate]             = useState(BLANK_STATE.kwHRate);
+  const [packagingItems, setPackagingItems] = useState<PackagingItem[]>(BLANK_STATE.packagingItems);
+  const [hardwareItems, setHardwareItems]   = useState<HardwareItem[]>([]);
+  const [etsyEnabled, setEtsyEnabled]       = useState(true);
 
   // Results state
-  const [salePrice, setSalePrice] = useState<number>(0);
+  const [salePrice, setSalePrice]       = useState<number>(0);
   const [targetMargin, setTargetMargin] = useState<number>(30);
-  const [lastEdited, setLastEdited] = useState<'price' | 'margin'>('margin');
+  const [lastEdited, setLastEdited]     = useState<'price' | 'margin'>('margin');
 
   // UI state
-  const [showLibrary, setShowLibrary] = useState(false);
-  const [saveNameDraft, setSaveNameDraft] = useState('');
-  const [showSaveInput, setShowSaveInput] = useState(false);
+  const [showLibrary, setShowLibrary]       = useState(false);
+  const [saveNameDraft, setSaveNameDraft]   = useState('');
+  const [showSaveInput, setShowSaveInput]   = useState(false);
 
-  const currentState = { filamentId, filamentGrams, printHours, printerWatts, kwHRate, packagingCost, hardwareItems };
-  const { filamentCost, electricityCost, hardwareCost, baseCost } = calcCosts(filaments, currentState);
+  const currentState = { filamentId, filamentGrams, printHours, printerWatts, kwHRate, packagingItems, hardwareItems };
+  const { filamentCost, electricityCost, hardwareCost, packagingCost, baseCost } = calcCosts(filaments, currentState);
 
-  // Two-way sync: when baseCost changes, recompute the non-user-edited field
-  const displayMargin = marginFromPrice(baseCost, salePrice) * 100;
-  const displayPrice = priceFromMargin(baseCost, targetMargin / 100);
+  // When Etsy fees are disabled, remove the fixed LISTING_FEE from the effective cost basis
+  const effectiveBaseCost = etsyEnabled ? baseCost : baseCost - LISTING_FEE;
+
+  const displayMargin = marginFromPrice(effectiveBaseCost, salePrice, etsyEnabled) * 100;
+  const displayPrice  = priceFromMargin(effectiveBaseCost, targetMargin / 100, etsyEnabled);
 
   function handlePriceChange(val: number) {
     setSalePrice(val);
     setLastEdited('price');
-    setTargetMargin(Math.round(marginFromPrice(baseCost, val) * 1000) / 10);
+    setTargetMargin(Math.round(marginFromPrice(effectiveBaseCost, val, etsyEnabled) * 1000) / 10);
   }
 
   function handleMarginChange(val: number) {
     setTargetMargin(val);
     setLastEdited('margin');
-    setSalePrice(Math.round(priceFromMargin(baseCost, val / 100) * 100) / 100);
+    setSalePrice(Math.round(priceFromMargin(effectiveBaseCost, val / 100, etsyEnabled) * 100) / 100);
   }
 
   function loadPreset(id: string) {
@@ -309,7 +337,10 @@ export function MarginCalculatorView() {
     setPrintHours(p.printHours);
     setPrinterWatts(p.printerWatts);
     setKwHRate(p.kwHRate);
-    setPackagingCost(p.packagingCost);
+    // Migrate old presets that stored a single packagingCost number
+    setPackagingItems(
+      p.packagingItems ?? [{ id: uid(), name: 'Packaging', cost: ((p as unknown) as { packagingCost?: number }).packagingCost ?? 0.75 }]
+    );
     setHardwareItems(p.hardwareItems);
   }
 
@@ -336,11 +367,11 @@ export function MarginCalculatorView() {
     setPrintHours(BLANK_STATE.printHours);
     setPrinterWatts(BLANK_STATE.printerWatts);
     setKwHRate(BLANK_STATE.kwHRate);
-    setPackagingCost(BLANK_STATE.packagingCost);
+    setPackagingItems(BLANK_STATE.packagingItems);
     setHardwareItems([]);
   }
 
-  // Filament library edit helpers
+  // Filament library helpers
   const updateFilament = useCallback((id: string, field: 'name' | 'costPerKg', value: string | number) => {
     setFilaments((prev) => {
       const updated = prev.map((f) => f.id === id ? { ...f, [field]: value } : f);
@@ -366,13 +397,15 @@ export function MarginCalculatorView() {
     });
   }, []);
 
-  const inputCls = 'w-full bg-white dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/60 text-slate-900 dark:text-slate-200 text-sm rounded-xl px-3.5 py-2.5 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500/60 transition-colors';
-  const numCls = `${inputCls} tabular-nums`;
-  const labelCls = 'block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5';
-  const cardCls = 'bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-none p-4 sm:p-5 mb-4';
+  // Style helpers — baseInputCls omits w-full so flex children can use flex-1 properly
+  const baseInputCls = 'bg-white dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/60 text-slate-900 dark:text-slate-200 text-sm rounded-xl px-3.5 py-2.5 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500/60 transition-colors';
+  const inputCls  = `w-full ${baseInputCls}`;
+  const numCls    = `${inputCls} tabular-nums`;
+  const labelCls  = 'block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5';
+  const cardCls   = 'bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-none p-4 sm:p-5 mb-4';
   const inlineCost = (val: number) => (
     <span className="ml-auto text-xs text-emerald-600 dark:text-emerald-400 font-mono font-semibold tabular-nums">
-      ${val.toFixed(3)}
+      ${val.toFixed(2)}
     </span>
   );
 
@@ -444,7 +477,6 @@ export function MarginCalculatorView() {
           </button>
         </div>
 
-        {/* Saved preset pills */}
         {presets.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-3">
             {presets.map((p) => (
@@ -475,7 +507,6 @@ export function MarginCalculatorView() {
           </button>
         </div>
 
-        {/* Inline library editor */}
         {showLibrary && (
           <div className="mb-4 p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200 dark:border-slate-700/50">
             <div className="space-y-2">
@@ -483,14 +514,14 @@ export function MarginCalculatorView() {
                 <div key={f.id} className="flex items-center gap-2">
                   <input
                     type="text"
-                    className={`${inputCls} flex-1 min-w-0`}
+                    className={`flex-1 min-w-0 ${baseInputCls}`}
                     value={f.name}
                     onChange={(e) => updateFilament(f.id, 'name', e.target.value)}
                     placeholder="Name"
                   />
                   <input
                     type="number"
-                    className={`${numCls} w-24 shrink-0`}
+                    className={`w-24 shrink-0 ${baseInputCls} tabular-nums`}
                     value={f.costPerKg}
                     onChange={(e) => updateFilament(f.id, 'costPerKg', parseFloat(e.target.value) || 0)}
                     placeholder="$/kg"
@@ -594,19 +625,56 @@ export function MarginCalculatorView() {
 
       {/* Packaging */}
       <div className={cardCls}>
-        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Packaging</h3>
-        <div>
-          <label className={labelCls}>Packaging cost ($)</label>
-          <input
-            type="number"
-            className={numCls}
-            value={packagingCost}
-            onChange={(e) => setPackagingCost(parseFloat(e.target.value) || 0)}
-            min="0"
-            step="0.25"
-            placeholder="0.75"
-          />
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Packaging</h3>
+          {packagingItems.length > 1 && (
+            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-mono font-semibold tabular-nums">
+              Total: ${packagingCost.toFixed(2)}
+            </span>
+          )}
         </div>
+        <div className="space-y-2">
+          {packagingItems.map((item) => (
+            <div key={item.id} className="flex items-center gap-2">
+              <input
+                type="text"
+                className={`flex-1 min-w-0 ${baseInputCls}`}
+                value={item.name}
+                onChange={(e) =>
+                  setPackagingItems((prev) =>
+                    prev.map((p) => (p.id === item.id ? { ...p, name: e.target.value } : p))
+                  )
+                }
+                placeholder="Item name"
+              />
+              <input
+                type="number"
+                className={`w-28 shrink-0 ${baseInputCls} tabular-nums`}
+                value={item.cost}
+                onChange={(e) =>
+                  setPackagingItems((prev) =>
+                    prev.map((p) => (p.id === item.id ? { ...p, cost: parseFloat(e.target.value) || 0 } : p))
+                  )
+                }
+                min="0"
+                step="0.25"
+                placeholder="0.00"
+              />
+              <button
+                onClick={() => setPackagingItems((prev) => prev.filter((p) => p.id !== item.id))}
+                className="text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors shrink-0"
+              >
+                <X size={15} />
+              </button>
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={() => setPackagingItems((prev) => [...prev, { id: uid(), name: '', cost: 0 }])}
+          className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
+        >
+          <Plus size={13} /> Add item
+        </button>
       </div>
 
       {/* Hardware Add-ons */}
@@ -624,7 +692,7 @@ export function MarginCalculatorView() {
             <div key={item.id} className="flex items-center gap-2">
               <input
                 type="text"
-                className={`${inputCls} flex-1 min-w-0`}
+                className={`flex-1 min-w-0 ${baseInputCls}`}
                 value={item.name}
                 onChange={(e) =>
                   setHardwareItems((prev) =>
@@ -635,7 +703,7 @@ export function MarginCalculatorView() {
               />
               <input
                 type="number"
-                className={`${numCls} w-24 shrink-0`}
+                className={`w-28 shrink-0 ${baseInputCls} tabular-nums`}
                 value={item.cost}
                 onChange={(e) =>
                   setHardwareItems((prev) =>
@@ -665,8 +733,23 @@ export function MarginCalculatorView() {
 
       {/* Etsy Fees */}
       <div className={cardCls}>
-        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Etsy Fees</h3>
-        <div className="space-y-2 text-xs text-slate-500 dark:text-slate-400">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Etsy Fees</h3>
+          <button
+            onClick={() => setEtsyEnabled((v) => !v)}
+            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${
+              etsyEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'
+            }`}
+            aria-label="Toggle Etsy fees"
+          >
+            <span
+              className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${
+                etsyEnabled ? 'translate-x-4' : 'translate-x-0.5'
+              }`}
+            />
+          </button>
+        </div>
+        <div className={`space-y-2 text-xs text-slate-500 dark:text-slate-400 transition-opacity ${!etsyEnabled ? 'opacity-40' : ''}`}>
           <div className="flex items-center justify-between">
             <span>Listing fee (per sale)</span>
             <span className="font-mono tabular-nums">${LISTING_FEE.toFixed(2)}</span>
@@ -680,14 +763,16 @@ export function MarginCalculatorView() {
             <span className="font-mono tabular-nums">{(PROCESSING_RATE * 100)}% + ${PROCESSING_FIXED.toFixed(2)}</span>
           </div>
           <p className="text-slate-400 dark:text-slate-500 pt-1">
-            Etsy fees apply to the sale price and are included in your margin calculation.
+            {etsyEnabled
+              ? 'Fees apply to sale price and are included in margin calculations.'
+              : 'Etsy fees disabled — calculations reflect direct costs only.'}
           </p>
         </div>
       </div>
 
       {/* Results */}
       <ResultsPanel
-        baseCost={baseCost}
+        baseCost={effectiveBaseCost}
         filamentCost={filamentCost}
         electricityCost={electricityCost}
         hardwareCost={hardwareCost}
@@ -697,6 +782,7 @@ export function MarginCalculatorView() {
         lastEdited={lastEdited}
         displayMargin={displayMargin}
         displayPrice={displayPrice}
+        etsyEnabled={etsyEnabled}
         onPriceChange={handlePriceChange}
         onMarginChange={handleMarginChange}
       />
