@@ -60,7 +60,9 @@ export function loadFilaments(): FilamentPreset[] {
 }
 
 export function saveFilaments(list: FilamentPreset[]) {
-  localStorage.setItem(LS_FILAMENTS, JSON.stringify(list));
+  try {
+    localStorage.setItem(LS_FILAMENTS, JSON.stringify(list));
+  } catch { /* ignore QuotaExceededError */ }
 }
 
 export function loadPresets(): ProductPreset[] {
@@ -72,7 +74,9 @@ export function loadPresets(): ProductPreset[] {
 }
 
 export function savePresets(list: ProductPreset[]) {
-  localStorage.setItem(LS_PRESETS, JSON.stringify(list));
+  try {
+    localStorage.setItem(LS_PRESETS, JSON.stringify(list));
+  } catch { /* ignore QuotaExceededError */ }
 }
 
 export function uid(): string {
