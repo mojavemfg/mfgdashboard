@@ -7,8 +7,13 @@ interface EtsyOrdersTableProps {
 }
 
 export function EtsyOrdersTable({ items, activeBuyer, onBuyerClick }: EtsyOrdersTableProps) {
-  // Track which orderId we've already shown to achieve ledger-style grouping
-  const seenOrderIds = new Set<string>();
+  // Derive order grouping before rendering — keeps render pure
+  const seen = new Set<string>();
+  const grouped = items.map((item) => {
+    const isFirstOfOrder = !seen.has(item.orderId);
+    if (isFirstOfOrder) seen.add(item.orderId);
+    return { ...item, isFirstOfOrder };
+  });
 
   return (
     <>
@@ -72,17 +77,14 @@ export function EtsyOrdersTable({ items, activeBuyer, onBuyerClick }: EtsyOrders
               </tr>
             </thead>
             <tbody>
-              {items.map((item) => {
-                const isFirstOfOrder = !seenOrderIds.has(item.orderId);
-                if (isFirstOfOrder) seenOrderIds.add(item.orderId);
-
+              {grouped.map((item) => {
                 return (
                   <tr
                     key={item.transactionId}
                     className="border-b border-slate-100 dark:border-slate-700/30 hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors"
                   >
                     <td className="px-3 py-3 text-slate-400 text-xs font-mono">
-                      {isFirstOfOrder ? item.orderId : <span className="text-slate-200 dark:text-slate-700">↳</span>}
+                      {item.isFirstOfOrder ? item.orderId : <span className="text-slate-200 dark:text-slate-700">↳</span>}
                     </td>
                     <td className="px-3 py-3 text-slate-800 dark:text-slate-200 text-xs max-w-xs truncate">{item.itemName}</td>
                     <td className="px-3 py-3 text-xs">
