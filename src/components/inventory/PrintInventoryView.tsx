@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Package, DollarSign, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Plus, Package, DollarSign, AlertTriangle, AlertCircle } from 'lucide-react';
 import { usePrintInventory } from '@/hooks/usePrintInventory';
 import { PrintInventoryTable } from './PrintInventoryTable';
 import { PrintItemForm } from './PrintItemForm';
@@ -39,7 +39,7 @@ export function PrintInventoryView() {
         <KpiCard
           label="Warning"
           value={kpis.warning}
-          icon={<CheckCircle size={18} />}
+          icon={<AlertCircle size={18} />}
           accent="yellow"
           sub="approaching safety stock"
         />
