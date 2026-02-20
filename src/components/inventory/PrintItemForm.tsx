@@ -54,26 +54,30 @@ export function PrintItemForm({ initial, onSave, onDelete, onClose }: Props) {
       Insert: 'pcs',
       'Spare Part': 'pcs',
     };
-    set('category', cat);
-    set('unit', unitDefaults[cat]);
+    setForm(prev => ({ ...prev, category: cat, unit: unitDefaults[cat] }));
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const item: PrintItem = {
-      id: initial?.id ?? '',
+      id: initial?.id || crypto.randomUUID(),
       ...form,
       supplier: form.supplier || undefined,
       unitCost: form.unitCost !== undefined && form.unitCost > 0 ? form.unitCost : undefined,
     };
     onSave(item);
-    onClose();
+    handleClose();
   }
 
   const isEdit = !!initial;
 
+  function handleClose() {
+    setConfirmDelete(false);
+    onClose();
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={handleClose}>
       <div
         className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700/60 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -81,7 +85,7 @@ export function PrintItemForm({ initial, onSave, onDelete, onClose }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700/60">
           <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{isEdit ? 'Edit Item' : 'Add Item'}</h2>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-colors">
+          <button onClick={handleClose} className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-colors">
             <X size={16} />
           </button>
         </div>
@@ -181,7 +185,7 @@ export function PrintItemForm({ initial, onSave, onDelete, onClose }: Props) {
               confirmDelete ? (
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-red-600 dark:text-red-400">Delete this item?</span>
-                  <button type="button" onClick={() => { onDelete(initial!.id); onClose(); }}
+                  <button type="button" onClick={() => { onDelete(initial!.id); handleClose(); }}
                     className="text-xs px-2.5 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium">
                     Confirm
                   </button>
@@ -199,7 +203,7 @@ export function PrintItemForm({ initial, onSave, onDelete, onClose }: Props) {
             ) : <span />}
 
             <div className="flex gap-2">
-              <button type="button" onClick={onClose}
+              <button type="button" onClick={handleClose}
                 className="px-4 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors font-medium">
                 Cancel
               </button>
