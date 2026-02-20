@@ -5,8 +5,8 @@ import { printInventorySeed } from '@/data/printInventory';
 const STORAGE_KEY = 'mfg-print-inventory';
 
 function deriveStatus(item: PrintItem): PrintStatus {
-  if (item.currentStock <= item.safetyStock) return 'Critical';
-  if (item.currentStock <= item.safetyStock * 1.5) return 'Warning';
+  if (item.currentStock < item.safetyStock) return 'Critical';
+  if (item.currentStock < item.safetyStock * 1.5) return 'Warning';
   return 'OK';
 }
 
@@ -28,10 +28,6 @@ function save(items: PrintItem[]) {
   }
 }
 
-function generateId(): string {
-  return `PI-${Date.now().toString(36).toUpperCase()}`;
-}
-
 export function usePrintInventory() {
   const [items, setItems] = useState<PrintItem[]>(load);
 
@@ -47,7 +43,7 @@ export function usePrintInventory() {
       const exists = prev.some((i) => i.id === item.id);
       const next = exists
         ? prev.map((i) => (i.id === item.id ? item : i))
-        : [...prev, { ...item, id: item.id || generateId() }];
+        : [...prev, item];
       save(next);
       return next;
     });

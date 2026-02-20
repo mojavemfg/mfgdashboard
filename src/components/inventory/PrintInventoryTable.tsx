@@ -127,7 +127,7 @@ export function PrintInventoryTable({ items, onEdit }: Props) {
                   <td className="px-3 py-3 text-slate-500 dark:text-slate-400 font-mono text-xs">{item.safetyStock} {item.unit}</td>
                   <td className="px-3 py-3 text-slate-500 dark:text-slate-400 font-mono text-xs">{item.leadTimeDays}d</td>
                   <td className="px-3 py-3 text-slate-500 dark:text-slate-400 font-mono text-xs">
-                    {item.totalValue > 0
+                    {item.unitCost !== undefined
                       ? `$${item.totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                       : '—'}
                   </td>

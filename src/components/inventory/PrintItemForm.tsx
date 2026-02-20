@@ -54,7 +54,15 @@ export function PrintItemForm({ initial, onSave, onDelete, onClose }: Props) {
       Insert: 'pcs',
       'Spare Part': 'pcs',
     };
-    setForm(prev => ({ ...prev, category: cat, unit: unitDefaults[cat] }));
+    setForm(prev => ({
+      ...prev,
+      category: cat,
+      unit: unitDefaults[cat],
+      material: cat === 'Filament' ? (prev.material ?? 'PLA') : undefined,
+      color: cat === 'Filament' ? prev.color : undefined,
+      insertSize: cat === 'Insert' ? (prev.insertSize ?? 'M3') : undefined,
+      insertType: cat === 'Insert' ? (prev.insertType ?? 'Heat-Set') : undefined,
+    }));
   }
 
   function handleSubmit(e: React.FormEvent) {

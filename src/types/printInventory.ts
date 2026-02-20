@@ -1,5 +1,7 @@
+import type { ReorderStatus } from '@/types';
+
 export type PrintCategory = 'Filament' | 'Insert' | 'Spare Part';
-export type PrintStatus = 'Critical' | 'Warning' | 'OK';
+export type PrintStatus = ReorderStatus;
 
 export interface PrintItem {
   id: string;
