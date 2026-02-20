@@ -118,13 +118,132 @@ export function priceFromMargin(baseCost: number, targetMargin: number) {
   return (baseCost + PROCESSING_FIXED) / denom;
 }
 
-// ─── Placeholder component — uses all imports so tsc is satisfied ─────────────
+// ─── Main Component ───────────────────────────────────────────────────────────
+
+const BLANK_STATE = {
+  filamentId: 'pla',
+  filamentGrams: 100,
+  printHours: 4,
+  printerWatts: 250,
+  kwHRate: 0.13,
+  packagingCost: 0.75,
+  hardwareItems: [] as HardwareItem[],
+};
 
 export function MarginCalculatorView() {
-  const [, _setState] = useState(false);
-  const _cb = useCallback(() => {}, []);
-  void _setState; void _cb;
+  const [filaments, setFilaments] = useState<FilamentPreset[]>(loadFilaments);
+  const [presets, setPresets] = useState<ProductPreset[]>(loadPresets);
+
+  // Working state
+  const [filamentId, setFilamentId] = useState(BLANK_STATE.filamentId);
+  const [filamentGrams, setFilamentGrams] = useState(BLANK_STATE.filamentGrams);
+  const [printHours, setPrintHours] = useState(BLANK_STATE.printHours);
+  const [printerWatts, setPrinterWatts] = useState(BLANK_STATE.printerWatts);
+  const [kwHRate, setKwHRate] = useState(BLANK_STATE.kwHRate);
+  const [packagingCost, setPackagingCost] = useState(BLANK_STATE.packagingCost);
+  const [hardwareItems, setHardwareItems] = useState<HardwareItem[]>([]);
+
+  // Results state
+  const [salePrice, setSalePrice] = useState<number>(0);
+  const [targetMargin, setTargetMargin] = useState<number>(30);
+  const [lastEdited, setLastEdited] = useState<'price' | 'margin'>('margin');
+
+  // UI state
+  const [showLibrary, setShowLibrary] = useState(false);
+  const [saveNameDraft, setSaveNameDraft] = useState('');
+  const [showSaveInput, setShowSaveInput] = useState(false);
+
+  const currentState = { filamentId, filamentGrams, printHours, printerWatts, kwHRate, packagingCost, hardwareItems };
+  const { filamentCost, electricityCost, hardwareCost, baseCost } = calcCosts(filaments, currentState);
+
+  // Two-way sync: when baseCost changes, recompute the non-user-edited field
+  const displayMargin = marginFromPrice(baseCost, salePrice) * 100;
+  const displayPrice = priceFromMargin(baseCost, targetMargin / 100);
+
+  function handlePriceChange(val: number) {
+    setSalePrice(val);
+    setLastEdited('price');
+    setTargetMargin(Math.round(marginFromPrice(baseCost, val) * 1000) / 10);
+  }
+
+  function handleMarginChange(val: number) {
+    setTargetMargin(val);
+    setLastEdited('margin');
+    setSalePrice(Math.round(priceFromMargin(baseCost, val / 100) * 100) / 100);
+  }
+
+  function loadPreset(id: string) {
+    const p = presets.find((x) => x.id === id);
+    if (!p) return;
+    setFilamentId(p.filamentId);
+    setFilamentGrams(p.filamentGrams);
+    setPrintHours(p.printHours);
+    setPrinterWatts(p.printerWatts);
+    setKwHRate(p.kwHRate);
+    setPackagingCost(p.packagingCost);
+    setHardwareItems(p.hardwareItems);
+  }
+
+  function savePreset() {
+    const name = saveNameDraft.trim();
+    if (!name) return;
+    const newPreset: ProductPreset = { id: uid(), name, ...currentState };
+    const updated = [...presets, newPreset];
+    setPresets(updated);
+    savePresets(updated);
+    setSaveNameDraft('');
+    setShowSaveInput(false);
+  }
+
+  function deletePreset(id: string) {
+    const updated = presets.filter((p) => p.id !== id);
+    setPresets(updated);
+    savePresets(updated);
+  }
+
+  function resetState() {
+    setFilamentId(BLANK_STATE.filamentId);
+    setFilamentGrams(BLANK_STATE.filamentGrams);
+    setPrintHours(BLANK_STATE.printHours);
+    setPrinterWatts(BLANK_STATE.printerWatts);
+    setKwHRate(BLANK_STATE.kwHRate);
+    setPackagingCost(BLANK_STATE.packagingCost);
+    setHardwareItems([]);
+  }
+
+  // Filament library edit helpers
+  const updateFilament = useCallback((id: string, field: 'name' | 'costPerKg', value: string | number) => {
+    setFilaments((prev) => {
+      const updated = prev.map((f) => f.id === id ? { ...f, [field]: value } : f);
+      saveFilaments(updated);
+      return updated;
+    });
+  }, []);
+
+  const addFilament = useCallback(() => {
+    setFilaments((prev) => {
+      const newF: FilamentPreset = { id: uid(), name: 'New', costPerKg: 25 };
+      const updated = [...prev, newF];
+      saveFilaments(updated);
+      return updated;
+    });
+  }, []);
+
+  const removeFilament = useCallback((id: string) => {
+    setFilaments((prev) => {
+      const updated = prev.filter((f) => f.id !== id);
+      saveFilaments(updated);
+      return updated;
+    });
+  }, []);
+
+  // JSX comes in Task 4
+  void showLibrary; void setShowLibrary; void saveNameDraft; void setSaveNameDraft;
+  void showSaveInput; void setShowSaveInput; void filamentCost; void electricityCost;
+  void hardwareCost; void displayMargin; void displayPrice;
+  void lastEdited; void handlePriceChange; void handleMarginChange; void loadPreset; void savePreset; void deletePreset; void resetState;
+  void updateFilament; void addFilament; void removeFilament;
   void Calculator; void Plus; void X; void Pencil; void Check; void Trash2;
   void PieChart; void Pie; void Cell; void Tooltip; void ResponsiveContainer; void Legend;
-  return <div className="max-w-2xl mx-auto"><p className="text-slate-500 dark:text-slate-400 text-sm">Margin Calculator — coming soon</p></div>;
+  return <div className="max-w-2xl mx-auto"><p className="text-slate-500 dark:text-slate-400 text-sm">Wiring state…</p></div>;
 }
