@@ -9,7 +9,7 @@ interface BottomNavProps {
 const navItems: { id: View; label: string; Icon: React.ComponentType<{ size?: number; className?: string }>; accent?: string }[] = [
   { id: 'dashboard', label: 'Dashboard', Icon: LayoutDashboard },
   { id: 'inventory', label: 'Inventory', Icon: PackageSearch },
-  { id: 'orders', label: 'Orders', Icon: ShoppingCart },
+  { id: 'orders', label: 'Order History', Icon: ShoppingCart },
   { id: 'charts', label: 'Analytics', Icon: BarChart2 },
   { id: 'seo', label: 'Etsy SEO', Icon: Tag, accent: 'orange' },
   { id: 'salesmap', label: 'Sales Map', Icon: Map },
