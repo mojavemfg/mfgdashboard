@@ -130,6 +130,135 @@ const BLANK_STATE = {
   hardwareItems: [] as HardwareItem[],
 };
 
+// ─── ResultsPanel ─────────────────────────────────────────────────────────────
+
+interface ResultsPanelProps {
+  baseCost: number;
+  filamentCost: number;
+  electricityCost: number;
+  hardwareCost: number;
+  packagingCost: number;
+  salePrice: number;
+  targetMargin: number;
+  lastEdited: 'price' | 'margin';
+  displayMargin: number;
+  displayPrice: number;
+  onPriceChange: (v: number) => void;
+  onMarginChange: (v: number) => void;
+}
+
+function ResultsPanel({
+  baseCost, filamentCost, electricityCost, hardwareCost, packagingCost,
+  salePrice, targetMargin, lastEdited, displayMargin, displayPrice,
+  onPriceChange, onMarginChange,
+}: ResultsPanelProps) {
+  const activeSalePrice = lastEdited === 'price' ? salePrice : displayPrice;
+  const activeMargin    = lastEdited === 'margin' ? targetMargin : displayMargin;
+
+  const etsyFees =
+    activeSalePrice > 0
+      ? activeSalePrice * TRANSACTION_RATE + activeSalePrice * PROCESSING_RATE + PROCESSING_FIXED
+      : 0;
+  const profit = activeSalePrice > 0 ? activeSalePrice - baseCost - etsyFees : 0;
+
+  const rawChartData = [
+    { name: 'Filament',    value: filamentCost },
+    { name: 'Electricity', value: electricityCost },
+    { name: 'Packaging',   value: packagingCost },
+    { name: 'Hardware',    value: hardwareCost },
+    { name: 'Etsy Fees',   value: etsyFees },
+  ];
+  const chartData = rawChartData.filter((d) => d.value > 0);
+
+  const marginBadgeCls =
+    activeMargin < 15
+      ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+      : activeMargin < 30
+      ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
+      : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400';
+
+  const inputCls =
+    'w-full bg-white dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/60 text-slate-900 dark:text-slate-200 text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500/60 transition-colors tabular-nums';
+  const labelCls =
+    'block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5';
+
+  return (
+    <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-none p-4 sm:p-5 mb-4">
+      <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Results</h3>
+
+      {/* Total cost */}
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Cost</span>
+        <span className="text-lg font-bold text-slate-800 dark:text-slate-200 font-mono tabular-nums">${baseCost.toFixed(3)}</span>
+      </div>
+
+      {/* Donut chart */}
+      {chartData.length > 0 && (
+        <div className="mb-4" style={{ height: 200 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={chartData} innerRadius={60} outerRadius={90} dataKey="value" paddingAngle={2}>
+                {chartData.map((_, i) => (
+                  <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip formatter={(v) => `$${Number(v).toFixed(3)}`} />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* Two-way inputs */}
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <div>
+          <label className={labelCls}>Sale Price ($)</label>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            className={inputCls}
+            value={lastEdited === 'price' ? salePrice : Number(displayPrice.toFixed(2))}
+            onChange={(e) => onPriceChange(parseFloat(e.target.value) || 0)}
+          />
+        </div>
+        <div>
+          <label className={labelCls}>Target Margin (%)</label>
+          <input
+            type="number"
+            min="0"
+            max="99"
+            step="0.1"
+            className={inputCls}
+            value={lastEdited === 'margin' ? targetMargin : Number(displayMargin.toFixed(1))}
+            onChange={(e) => onMarginChange(parseFloat(e.target.value) || 0)}
+          />
+        </div>
+      </div>
+
+      {/* Profit summary */}
+      {activeSalePrice > 0 ? (
+        <div className="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-700/50">
+          <span
+            className={`text-sm font-bold font-mono tabular-nums ${
+              profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
+            }`}
+          >
+            {profit >= 0 ? '+' : ''}${profit.toFixed(2)} profit
+          </span>
+          <span className={`text-xs font-semibold px-2 py-1 rounded-lg ${marginBadgeCls}`}>
+            {activeMargin.toFixed(1)}% margin
+          </span>
+        </div>
+      ) : (
+        <p className="text-xs text-center text-slate-400 dark:text-slate-500">
+          Enter a sale price or target margin to see results
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function MarginCalculatorView() {
   const [filaments, setFilaments] = useState<FilamentPreset[]>(loadFilaments);
   const [presets, setPresets] = useState<ProductPreset[]>(loadPresets);
@@ -237,13 +366,340 @@ export function MarginCalculatorView() {
     });
   }, []);
 
-  // JSX comes in Task 4
-  void showLibrary; void setShowLibrary; void saveNameDraft; void setSaveNameDraft;
-  void showSaveInput; void setShowSaveInput; void filamentCost; void electricityCost;
-  void hardwareCost; void displayMargin; void displayPrice;
-  void lastEdited; void handlePriceChange; void handleMarginChange; void loadPreset; void savePreset; void deletePreset; void resetState;
-  void updateFilament; void addFilament; void removeFilament;
-  void Calculator; void Plus; void X; void Pencil; void Check; void Trash2;
-  void PieChart; void Pie; void Cell; void Tooltip; void ResponsiveContainer; void Legend;
-  return <div className="max-w-2xl mx-auto"><p className="text-slate-500 dark:text-slate-400 text-sm">Wiring state…</p></div>;
+  const inputCls = 'w-full bg-white dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/60 text-slate-900 dark:text-slate-200 text-sm rounded-xl px-3.5 py-2.5 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500/60 transition-colors';
+  const numCls = `${inputCls} tabular-nums`;
+  const labelCls = 'block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5';
+  const cardCls = 'bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-none p-4 sm:p-5 mb-4';
+  const inlineCost = (val: number) => (
+    <span className="ml-auto text-xs text-emerald-600 dark:text-emerald-400 font-mono font-semibold tabular-nums">
+      ${val.toFixed(3)}
+    </span>
+  );
+
+  return (
+    <div className="max-w-2xl mx-auto pb-24 sm:pb-8">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-xl flex items-center justify-center">
+          <Calculator size={20} className="text-emerald-600 dark:text-emerald-400" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Margin Calculator</h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400">3D print Etsy listing cost & margin analyzer</p>
+        </div>
+      </div>
+
+      {/* Preset bar */}
+      <div className={cardCls}>
+        <div className="flex items-center gap-2 flex-wrap">
+          <select
+            className={`${inputCls} w-auto flex-1 min-w-0`}
+            defaultValue=""
+            onChange={(e) => { if (e.target.value) loadPreset(e.target.value); e.currentTarget.value = ''; }}
+          >
+            <option value="">Load preset…</option>
+            {presets.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+
+          {showSaveInput ? (
+            <div className="flex items-center gap-1 flex-1 min-w-0">
+              <input
+                type="text"
+                className={`${inputCls} flex-1 min-w-0`}
+                placeholder="Preset name…"
+                value={saveNameDraft}
+                onChange={(e) => setSaveNameDraft(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') savePreset(); if (e.key === 'Escape') setShowSaveInput(false); }}
+                autoFocus
+              />
+              <button
+                onClick={savePreset}
+                className="p-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors shrink-0"
+              >
+                <Check size={15} />
+              </button>
+              <button
+                onClick={() => setShowSaveInput(false)}
+                className="p-2 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors shrink-0"
+              >
+                <X size={15} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowSaveInput(true)}
+              className="px-3 py-2 text-xs font-semibold bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors shrink-0"
+            >
+              Save as…
+            </button>
+          )}
+
+          <button
+            onClick={resetState}
+            className="px-3 py-2 text-xs font-semibold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors shrink-0"
+          >
+            New
+          </button>
+        </div>
+
+        {/* Saved preset pills */}
+        {presets.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-3">
+            {presets.map((p) => (
+              <div key={p.id} className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/60 rounded-lg px-2 py-1">
+                <span className="text-xs text-slate-700 dark:text-slate-300">{p.name}</span>
+                <button
+                  onClick={() => deletePreset(p.id)}
+                  className="text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                >
+                  <X size={11} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Filament & Materials */}
+      <div className={cardCls}>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Filament & Materials</h3>
+          <button
+            onClick={() => setShowLibrary((v) => !v)}
+            className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+          >
+            <Pencil size={12} />
+            Edit Library
+          </button>
+        </div>
+
+        {/* Inline library editor */}
+        {showLibrary && (
+          <div className="mb-4 p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200 dark:border-slate-700/50">
+            <div className="space-y-2">
+              {filaments.map((f) => (
+                <div key={f.id} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    className={`${inputCls} flex-1 min-w-0`}
+                    value={f.name}
+                    onChange={(e) => updateFilament(f.id, 'name', e.target.value)}
+                    placeholder="Name"
+                  />
+                  <input
+                    type="number"
+                    className={`${numCls} w-24 shrink-0`}
+                    value={f.costPerKg}
+                    onChange={(e) => updateFilament(f.id, 'costPerKg', parseFloat(e.target.value) || 0)}
+                    placeholder="$/kg"
+                    step="0.01"
+                    min="0"
+                  />
+                  <button
+                    onClick={() => removeFilament(f.id)}
+                    className="text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors shrink-0"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={addFilament}
+              className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
+            >
+              <Plus size={13} /> Add filament
+            </button>
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={labelCls}>Filament type</label>
+            <select
+              className={inputCls}
+              value={filamentId}
+              onChange={(e) => setFilamentId(e.target.value)}
+            >
+              {filaments.map((f) => (
+                <option key={f.id} value={f.id}>{f.name} (${f.costPerKg}/kg)</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <div className="flex items-center mb-1.5">
+              <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Grams used</label>
+              {inlineCost(filamentCost)}
+            </div>
+            <input
+              type="number"
+              className={numCls}
+              value={filamentGrams}
+              onChange={(e) => setFilamentGrams(parseFloat(e.target.value) || 0)}
+              min="0"
+              step="1"
+              placeholder="100"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Print Settings */}
+      <div className={cardCls}>
+        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Print Settings</h3>
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <label className={labelCls}>Print time (hr)</label>
+            <input
+              type="number"
+              className={numCls}
+              value={printHours}
+              onChange={(e) => setPrintHours(parseFloat(e.target.value) || 0)}
+              min="0"
+              step="0.5"
+              placeholder="4"
+            />
+          </div>
+          <div>
+            <label className={labelCls}>Printer (W)</label>
+            <input
+              type="number"
+              className={numCls}
+              value={printerWatts}
+              onChange={(e) => setPrinterWatts(parseFloat(e.target.value) || 0)}
+              min="0"
+              step="10"
+              placeholder="250"
+            />
+          </div>
+          <div>
+            <div className="flex items-center mb-1.5">
+              <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Rate ($/kWh)</label>
+              {inlineCost(electricityCost)}
+            </div>
+            <input
+              type="number"
+              className={numCls}
+              value={kwHRate}
+              onChange={(e) => setKwHRate(parseFloat(e.target.value) || 0)}
+              min="0"
+              step="0.01"
+              placeholder="0.13"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Packaging */}
+      <div className={cardCls}>
+        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Packaging</h3>
+        <div>
+          <label className={labelCls}>Packaging cost ($)</label>
+          <input
+            type="number"
+            className={numCls}
+            value={packagingCost}
+            onChange={(e) => setPackagingCost(parseFloat(e.target.value) || 0)}
+            min="0"
+            step="0.25"
+            placeholder="0.75"
+          />
+        </div>
+      </div>
+
+      {/* Hardware Add-ons */}
+      <div className={cardCls}>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Hardware Add-ons</h3>
+          {hardwareItems.length > 0 && (
+            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-mono font-semibold tabular-nums">
+              Total: ${hardwareCost.toFixed(2)}
+            </span>
+          )}
+        </div>
+        <div className="space-y-2">
+          {hardwareItems.map((item) => (
+            <div key={item.id} className="flex items-center gap-2">
+              <input
+                type="text"
+                className={`${inputCls} flex-1 min-w-0`}
+                value={item.name}
+                onChange={(e) =>
+                  setHardwareItems((prev) =>
+                    prev.map((h) => (h.id === item.id ? { ...h, name: e.target.value } : h))
+                  )
+                }
+                placeholder="Item name"
+              />
+              <input
+                type="number"
+                className={`${numCls} w-24 shrink-0`}
+                value={item.cost}
+                onChange={(e) =>
+                  setHardwareItems((prev) =>
+                    prev.map((h) => (h.id === item.id ? { ...h, cost: parseFloat(e.target.value) || 0 } : h))
+                  )
+                }
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+              />
+              <button
+                onClick={() => setHardwareItems((prev) => prev.filter((h) => h.id !== item.id))}
+                className="text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors shrink-0"
+              >
+                <X size={15} />
+              </button>
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={() => setHardwareItems((prev) => [...prev, { id: uid(), name: '', cost: 0 }])}
+          className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
+        >
+          <Plus size={13} /> Add item
+        </button>
+      </div>
+
+      {/* Etsy Fees */}
+      <div className={cardCls}>
+        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Etsy Fees</h3>
+        <div className="space-y-2 text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex items-center justify-between">
+            <span>Listing fee (per sale)</span>
+            <span className="font-mono tabular-nums">${LISTING_FEE.toFixed(2)}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span>Transaction fee</span>
+            <span className="font-mono tabular-nums">{(TRANSACTION_RATE * 100).toFixed(1)}%</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span>Payment processing</span>
+            <span className="font-mono tabular-nums">{(PROCESSING_RATE * 100)}% + ${PROCESSING_FIXED.toFixed(2)}</span>
+          </div>
+          <p className="text-slate-400 dark:text-slate-500 pt-1">
+            Etsy fees apply to the sale price and are included in your margin calculation.
+          </p>
+        </div>
+      </div>
+
+      {/* Results */}
+      <ResultsPanel
+        baseCost={baseCost}
+        filamentCost={filamentCost}
+        electricityCost={electricityCost}
+        hardwareCost={hardwareCost}
+        packagingCost={packagingCost}
+        salePrice={salePrice}
+        targetMargin={targetMargin}
+        lastEdited={lastEdited}
+        displayMargin={displayMargin}
+        displayPrice={displayPrice}
+        onPriceChange={handlePriceChange}
+        onMarginChange={handleMarginChange}
+      />
+    </div>
+  );
 }
