@@ -81,3 +81,33 @@ export interface EtsyOrderItem {
   shipState: string;
   shipCountry: string;
 }
+
+// ─── Etsy Listing Analysis ─────────────────────────────────────────────────
+
+export interface EtsyListing {
+  title: string;
+  description: string;
+  price: number;
+  quantity: number;
+  tags: string[];          // already split on comma, trimmed
+  materials: string;
+  images: string[];        // only non-empty image URLs
+  sku: string;
+}
+
+export interface ListingSubScores {
+  tags: number;     // 0–100
+  title: number;    // 0–100
+  images: number;   // 0–100
+  description: number; // 0–100
+  price: number;    // 0–100
+}
+
+export interface ScoredListing extends EtsyListing {
+  index: number;              // original row position
+  overall: number;            // weighted 0–100
+  subScores: ListingSubScores;
+  aiTags: string[] | null;    // null = not yet fetched; [] = fetch attempted, no result
+  aiStatus: 'pending' | 'loading' | 'done' | 'error';
+  aiError?: string;
+}
