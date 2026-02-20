@@ -64,3 +64,20 @@ export interface SaleRecord {
   orderValue: number;
   numItems: number;
 }
+
+export interface EtsyOrderItem {
+  transactionId: string; // unique per CSV row — dedup key
+  orderId: string;
+  saleDate: string;       // raw from CSV e.g. "12/30/25"
+  itemName: string;
+  shipName: string;       // from "Ship Name" col, preferred over Buyer username
+  quantity: number;
+  price: number;          // per unit
+  discountAmount: number;
+  shipping: number;       // order-level shipping (repeated per item)
+  itemTotal: number;
+  dateShipped: string;    // empty string if not yet shipped
+  shipCity: string;
+  shipState: string;
+  shipCountry: string;
+}
