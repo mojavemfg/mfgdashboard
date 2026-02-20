@@ -1,4 +1,4 @@
-import { LayoutDashboard, PackageSearch, ShoppingCart, BarChart2, Tag, Map, Calculator } from 'lucide-react';
+import { LayoutDashboard, PackageSearch, ShoppingCart, LayoutList, Tag, Map, Calculator } from 'lucide-react';
 import type { View } from '@/App';
 
 interface SidebarProps {
@@ -10,7 +10,7 @@ const navItems: { id: View; label: string; Icon: React.ComponentType<{ size?: nu
   { id: 'dashboard', label: 'Dashboard', Icon: LayoutDashboard },
   { id: 'inventory', label: 'Inventory', Icon: PackageSearch },
   { id: 'orders', label: 'Order History', Icon: ShoppingCart },
-  { id: 'charts', label: 'Analytics', Icon: BarChart2 },
+  { id: 'listings', label: 'Listings', Icon: LayoutList },
   { id: 'seo', label: 'Etsy SEO', Icon: Tag, accent: 'orange' },
   { id: 'salesmap', label: 'Sales Map', Icon: Map },
   { id: 'margin', label: 'Margin Calc', Icon: Calculator, accent: 'emerald' },

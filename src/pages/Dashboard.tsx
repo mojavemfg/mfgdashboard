@@ -1,6 +1,4 @@
-import { useState } from 'react';
 import { useInventoryMetrics } from '@/hooks/useInventoryMetrics';
-import { consumptionRecords } from '@/data';
 import type { View } from '@/App';
 import type { EtsyOrderItem } from '@/types';
 import type { MergeResult } from '@/hooks/useSalesOrders';
@@ -9,13 +7,11 @@ import { KpiCardGrid } from '@/components/kpi/KpiCardGrid';
 import { ReorderAlertsPanel } from '@/components/alerts/ReorderAlertsPanel';
 import { InventoryTable } from '@/components/inventory/InventoryTable';
 import { OrderHistoryView } from '@/components/orders/OrderHistoryView';
-import { ConsumptionTrendChart } from '@/components/charts/ConsumptionTrendChart';
-import { InventoryLevelChart } from '@/components/charts/InventoryLevelChart';
-import { ChartComponentSelector } from '@/components/charts/ChartComponentSelector';
 import { PageSection } from '@/components/layout/PageSection';
 import { EtsySeoTool } from '@/components/seo/EtsySeoTool';
 import { SalesMapView } from '@/components/salesmap/SalesMapView';
 import { MarginCalculatorView } from '@/components/margin/MarginCalculatorView';
+import { ListingsView } from '@/components/listings/ListingsView';
 
 interface DashboardProps {
   activeView: View;
@@ -28,8 +24,6 @@ interface DashboardProps {
 export function Dashboard({ activeView, isDark, salesOrders, onMergeSalesOrders, onClearSalesOrders }: DashboardProps) {
   const metrics = useInventoryMetrics();
   const { enrichedComponents } = metrics;
-  const [selectedChartCompId, setSelectedChartCompId] = useState(enrichedComponents[0]?.id ?? '');
-  const selectedComp = enrichedComponents.find((c) => c.id === selectedChartCompId);
 
   return (
     <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950">
@@ -66,27 +60,8 @@ export function Dashboard({ activeView, isDark, salesOrders, onMergeSalesOrders,
           </PageSection>
         )}
 
-        {activeView === 'charts' && (
-          <>
-            <PageSection title="Consumption Trend">
-              <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className="text-slate-500 dark:text-slate-400 text-sm">Component:</span>
-                <ChartComponentSelector components={enrichedComponents} selectedId={selectedChartCompId} onChange={setSelectedChartCompId} />
-              </div>
-              {selectedComp && (
-                <ConsumptionTrendChart
-                  componentId={selectedComp.id}
-                  componentName={selectedComp.name}
-                  records={consumptionRecords}
-                  avgDaily={selectedComp.avgDailyConsumption}
-                  isDark={isDark}
-                />
-              )}
-            </PageSection>
-            <PageSection title="Inventory Level Analysis">
-              <InventoryLevelChart components={enrichedComponents} isDark={isDark} />
-            </PageSection>
-          </>
+        {activeView === 'listings' && (
+          <ListingsView />
         )}
 
         {activeView === 'seo' && (
