@@ -6,6 +6,7 @@ import type { MergeResult } from '@/hooks/useSalesOrders';
 import { KpiCardGrid } from '@/components/kpi/KpiCardGrid';
 import { ReorderAlertsPanel } from '@/components/alerts/ReorderAlertsPanel';
 import { InventoryTable } from '@/components/inventory/InventoryTable';
+import { PrintInventoryView } from '@/components/inventory/PrintInventoryView';
 import { OrderHistoryView } from '@/components/orders/OrderHistoryView';
 import { PageSection } from '@/components/layout/PageSection';
 import { EtsySeoTool } from '@/components/seo/EtsySeoTool';
@@ -45,8 +46,8 @@ export function Dashboard({ activeView, isDark, salesOrders, onMergeSalesOrders,
         )}
 
         {activeView === 'inventory' && (
-          <PageSection title="Inventory Management">
-            <InventoryTable components={enrichedComponents} />
+          <PageSection title="Print Inventory">
+            <PrintInventoryView />
           </PageSection>
         )}
 
