@@ -1,4 +1,4 @@
-import { LayoutDashboard, PackageSearch, ShoppingCart, BarChart2, Tag, Map } from 'lucide-react';
+import { LayoutDashboard, PackageSearch, ShoppingCart, BarChart2, Tag, Map, Calculator } from 'lucide-react';
 import type { View } from '@/App';
 
 interface BottomNavProps {
@@ -13,6 +13,7 @@ const navItems: { id: View; label: string; Icon: React.ComponentType<{ size?: nu
   { id: 'charts', label: 'Analytics', Icon: BarChart2 },
   { id: 'seo', label: 'Etsy SEO', Icon: Tag },
   { id: 'salesmap', label: 'Sales Map', Icon: Map },
+  { id: 'margin', label: 'Margin', Icon: Calculator },
 ];
 
 export function BottomNav({ activeView, onViewChange }: BottomNavProps) {
@@ -21,13 +22,16 @@ export function BottomNav({ activeView, onViewChange }: BottomNavProps) {
       {navItems.map(({ id, label, Icon }) => {
         const active = activeView === id;
         const isSeo = id === 'seo';
+        const isMargin = id === 'margin';
         return (
           <button
             key={id}
             onClick={() => onViewChange(id)}
             className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 transition-colors cursor-pointer border-none bg-transparent ${
               active
-                ? isSeo ? 'text-orange-500 dark:text-orange-400' : 'text-blue-600 dark:text-blue-400'
+                ? isSeo ? 'text-orange-500 dark:text-orange-400'
+                : isMargin ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-blue-600 dark:text-blue-400'
                 : 'text-slate-400 dark:text-slate-500'
             }`}
           >

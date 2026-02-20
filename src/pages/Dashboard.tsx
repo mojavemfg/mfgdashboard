@@ -13,6 +13,7 @@ import { ChartComponentSelector } from '@/components/charts/ChartComponentSelect
 import { PageSection } from '@/components/layout/PageSection';
 import { EtsySeoTool } from '@/components/seo/EtsySeoTool';
 import { SalesMapView } from '@/components/salesmap/SalesMapView';
+import { MarginCalculatorView } from '@/components/margin/MarginCalculatorView';
 
 interface DashboardProps {
   activeView: View;
@@ -85,6 +86,10 @@ export function Dashboard({ activeView, isDark }: DashboardProps) {
 
         {activeView === 'salesmap' && (
           <SalesMapView isDark={isDark} />
+        )}
+
+        {activeView === 'margin' && (
+          <MarginCalculatorView />
         )}
       </div>
     </main>
