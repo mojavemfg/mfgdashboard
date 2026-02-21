@@ -127,7 +127,6 @@ export function OperationsHealthSection({
       <HealthCard
         icon={<Package size={15} />}
         title="Components"
-        onNavigate={() => onNavigate('dashboard')}
       >
         <div className="flex flex-wrap gap-1.5">
           <StatusPill count={invHealthy} label="OK" color="green" />
