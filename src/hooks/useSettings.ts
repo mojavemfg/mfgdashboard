@@ -3,6 +3,10 @@ import { useState } from 'react';
 export interface AppSettings {
   shopName: string;
   etsyShopName: string;
+  branding: {
+    companyName: string;
+    logoUrl: string;       // data-URL from file upload
+  };
   printing: {
     defaultWatts: number;
     defaultKwhRate: number;
@@ -22,6 +26,10 @@ export interface AppSettings {
 export const DEFAULT_SETTINGS: AppSettings = {
   shopName: '',
   etsyShopName: '',
+  branding: {
+    companyName: '',
+    logoUrl: '',
+  },
   printing: {
     defaultWatts: 250,
     defaultKwhRate: 0.13,
@@ -53,6 +61,7 @@ function loadSettings(): AppSettings {
       return {
         ...DEFAULT_SETTINGS,
         ...parsed,
+        branding:  isPlainObject(parsed.branding)  ? { ...DEFAULT_SETTINGS.branding,  ...parsed.branding  } : DEFAULT_SETTINGS.branding,
         printing:  isPlainObject(parsed.printing)  ? { ...DEFAULT_SETTINGS.printing,  ...parsed.printing  } : DEFAULT_SETTINGS.printing,
         etsyFees:  isPlainObject(parsed.etsyFees)  ? { ...DEFAULT_SETTINGS.etsyFees,  ...parsed.etsyFees  } : DEFAULT_SETTINGS.etsyFees,
         inventory: isPlainObject(parsed.inventory) ? { ...DEFAULT_SETTINGS.inventory, ...parsed.inventory } : DEFAULT_SETTINGS.inventory,
@@ -66,7 +75,8 @@ function loadSettings(): AppSettings {
   return DEFAULT_SETTINGS;
 }
 
-export type SettingsUpdate = Partial<Omit<AppSettings, 'printing' | 'etsyFees' | 'inventory'>> & {
+export type SettingsUpdate = Partial<Omit<AppSettings, 'branding' | 'printing' | 'etsyFees' | 'inventory'>> & {
+  branding?:  Partial<AppSettings['branding']>;
   printing?:  Partial<AppSettings['printing']>;
   etsyFees?:  Partial<AppSettings['etsyFees']>;
   inventory?: Partial<AppSettings['inventory']>;
@@ -80,6 +90,7 @@ export function useSettings() {
       const next: AppSettings = {
         ...prev,
         ...partial,
+        branding:  { ...prev.branding,  ...(partial.branding  ?? {}) },
         printing:  { ...prev.printing,  ...(partial.printing  ?? {}) },
         etsyFees:  { ...prev.etsyFees,  ...(partial.etsyFees  ?? {}) },
         inventory: { ...prev.inventory, ...(partial.inventory  ?? {}) },

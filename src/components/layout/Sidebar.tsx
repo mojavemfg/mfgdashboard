@@ -11,6 +11,8 @@ interface SidebarProps {
   onViewChange: (view: View) => void;
   mobileOpen?: boolean;
   onMobileClose?: () => void;
+  companyName?: string;
+  logoUrl?: string;
 }
 
 interface NavItem {
@@ -134,10 +136,14 @@ function SidebarContent({
   activeView,
   onViewChange,
   mobile = false,
+  companyName,
+  logoUrl,
 }: {
   activeView: View;
   onViewChange: (view: View) => void;
   mobile?: boolean;
+  companyName?: string;
+  logoUrl?: string;
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const sections = buildSections(navItems);
@@ -154,11 +160,15 @@ function SidebarContent({
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]',
           ].join(' ')}
         >
-          <div className="w-6 h-6 rounded-sm bg-[var(--color-brand)] flex items-center justify-center shrink-0">
-            <Factory size={14} className="text-white" />
-          </div>
-          <span className="text-sm font-semibold text-[var(--color-text-primary)] flex-1 text-left">
-            MFG Ops
+          {logoUrl ? (
+            <img src={logoUrl} alt="" className="w-6 h-6 rounded-sm object-contain shrink-0" />
+          ) : (
+            <div className="w-6 h-6 rounded-sm bg-[var(--color-brand)] flex items-center justify-center shrink-0">
+              <Factory size={14} className="text-white" />
+            </div>
+          )}
+          <span className="text-sm font-semibold text-[var(--color-text-primary)] flex-1 text-left truncate">
+            {companyName || 'MFG Ops'}
           </span>
           <ChevronDown
             size={14}
@@ -225,12 +235,12 @@ function SidebarContent({
   );
 }
 
-export function Sidebar({ activeView, onViewChange, mobileOpen = false, onMobileClose }: SidebarProps) {
+export function Sidebar({ activeView, onViewChange, mobileOpen = false, onMobileClose, companyName, logoUrl }: SidebarProps) {
   return (
     <>
       {/* Desktop sidebar — always visible at lg+ */}
       <aside className="hidden lg:flex w-[220px] shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-bg)]">
-        <SidebarContent activeView={activeView} onViewChange={onViewChange} />
+        <SidebarContent activeView={activeView} onViewChange={onViewChange} companyName={companyName} logoUrl={logoUrl} />
       </aside>
 
       {/* Mobile/tablet drawer — slides in from left */}
@@ -254,6 +264,8 @@ export function Sidebar({ activeView, onViewChange, mobileOpen = false, onMobile
               activeView={activeView}
               onViewChange={(v) => { onViewChange(v); onMobileClose?.(); }}
               mobile
+              companyName={companyName}
+              logoUrl={logoUrl}
             />
           </aside>
         </div>

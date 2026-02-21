@@ -24,7 +24,7 @@ export function SettingsView({ settings, update, isDark, onThemeToggle }: Settin
       case 'printing':         return <PrintingDefaultsSection settings={settings} update={update} />;
       case 'etsy-fees':        return <EtsyFeesSection settings={settings} update={update} />;
       case 'inventory-alerts': return <InventoryAlertsSection settings={settings} update={update} />;
-      case 'appearance':       return <AppearanceSection isDark={isDark} onThemeToggle={onThemeToggle} />;
+      case 'appearance':       return <AppearanceSection isDark={isDark} onThemeToggle={onThemeToggle} settings={settings} update={update} />;
       case 'data-management':  return <DataManagementSection />;
       default:                 return null;
     }

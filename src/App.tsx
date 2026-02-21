@@ -100,6 +100,8 @@ function App() {
             onViewChange={setActiveView}
             mobileOpen={sidebar.isOpen}
             onMobileClose={sidebar.close}
+            companyName={settings.branding.companyName}
+            logoUrl={settings.branding.logoUrl}
           />
           <Dashboard
             activeView={activeView}
