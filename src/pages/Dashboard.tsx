@@ -12,6 +12,7 @@ import { PageSection } from '@/components/layout/PageSection';
 import { EtsySeoTool } from '@/components/seo/EtsySeoTool';
 import { SalesMapView } from '@/components/salesmap/SalesMapView';
 import { MarginCalculatorView } from '@/components/margin/MarginCalculatorView';
+import { SettingsView } from '@/components/settings/SettingsView';
 import { ListingsView } from '@/components/listings/ListingsView';
 import { AlertsStrip } from '@/components/dashboard/AlertsStrip';
 import { PerformanceSection } from '@/components/dashboard/PerformanceSection';
@@ -116,9 +117,12 @@ export function Dashboard({ activeView, isDark, salesOrders, onMergeSalesOrders,
         )}
 
         {activeView === 'settings' && (
-          <div className="max-w-4xl mx-auto pb-24 md:pb-8">
-            <p className="text-slate-400 dark:text-slate-500 text-sm">Settings coming soon</p>
-          </div>
+          <SettingsView
+            settings={settings}
+            update={updateSettings}
+            isDark={isDark}
+            onThemeToggle={onThemeToggle}
+          />
         )}
       </div>
     </main>
