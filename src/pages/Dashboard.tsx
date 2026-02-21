@@ -4,6 +4,7 @@ import type { View } from '@/App';
 import type { EtsyOrderItem } from '@/types';
 import type { MergeResult } from '@/hooks/useSalesOrders';
 import type { PrintItemWithStatus, PrintItem } from '@/types/printInventory';
+import type { AppSettings, SettingsUpdate } from '@/hooks/useSettings';
 
 import { PrintInventoryView } from '@/components/inventory/PrintInventoryView';
 import { OrderHistoryView } from '@/components/orders/OrderHistoryView';
@@ -27,9 +28,12 @@ interface DashboardProps {
   printEnriched: PrintItemWithStatus[];
   onUpsertPrintItem: (item: PrintItem) => void;
   onRemovePrintItem: (id: string) => void;
+  onThemeToggle: () => void;
+  settings: AppSettings;
+  updateSettings: (p: SettingsUpdate) => void;
 }
 
-export function Dashboard({ activeView, isDark, salesOrders, onMergeSalesOrders, onClearSalesOrders, onNavigate, printKpis, printEnriched, onUpsertPrintItem, onRemovePrintItem }: DashboardProps) {
+export function Dashboard({ activeView, isDark, salesOrders, onMergeSalesOrders, onClearSalesOrders, onNavigate, printKpis, printEnriched, onUpsertPrintItem, onRemovePrintItem, onThemeToggle, settings, updateSettings }: DashboardProps) {
   const metrics = useInventoryMetrics();
 
   const salesMetrics = useDashboardSalesMetrics(salesOrders);
@@ -109,6 +113,12 @@ export function Dashboard({ activeView, isDark, salesOrders, onMergeSalesOrders,
 
         {activeView === 'margin' && (
           <MarginCalculatorView />
+        )}
+
+        {activeView === 'settings' && (
+          <div className="max-w-4xl mx-auto pb-24 md:pb-8">
+            <p className="text-slate-400 dark:text-slate-500 text-sm">Settings coming soon</p>
+          </div>
         )}
       </div>
     </main>

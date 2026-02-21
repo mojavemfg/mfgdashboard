@@ -1,4 +1,4 @@
-import { LayoutDashboard, PackageSearch, ShoppingCart, LayoutList, Tag, Map, Calculator } from 'lucide-react';
+import { LayoutDashboard, PackageSearch, ShoppingCart, LayoutList, Tag, Map, Calculator, Settings } from 'lucide-react';
 import type { View } from '@/App';
 
 interface BottomNavProps {
@@ -14,6 +14,7 @@ const navItems: { id: View; label: string; Icon: React.ComponentType<{ size?: nu
   { id: 'seo', label: 'Etsy SEO', Icon: Tag, accent: 'orange' },
   { id: 'salesmap', label: 'Sales Map', Icon: Map },
   { id: 'margin', label: 'Margin', Icon: Calculator, accent: 'emerald' },
+  { id: 'settings', label: 'Settings', Icon: Settings },
 ];
 
 export function BottomNav({ activeView, onViewChange }: BottomNavProps) {

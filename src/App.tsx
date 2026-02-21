@@ -7,8 +7,9 @@ import { useInventoryMetrics } from '@/hooks/useInventoryMetrics';
 import { useTheme } from '@/hooks/useTheme';
 import { useSalesOrders } from '@/hooks/useSalesOrders';
 import { usePrintInventory } from '@/hooks/usePrintInventory';
+import { useSettings } from '@/hooks/useSettings';
 
-export type View = 'dashboard' | 'inventory' | 'orders' | 'listings' | 'seo' | 'salesmap' | 'margin';
+export type View = 'dashboard' | 'inventory' | 'orders' | 'listings' | 'seo' | 'salesmap' | 'margin' | 'settings';
 
 function App() {
   const [activeView, setActiveView] = useState<View>('dashboard');
@@ -16,6 +17,7 @@ function App() {
   const { isDark, toggle } = useTheme();
   const { orders: salesOrders, merge: mergeSalesOrders, clear: clearSalesOrders } = useSalesOrders();
   const { enriched: printEnriched, upsert: upsertPrintItem, remove: removePrintItem, kpis: printKpis } = usePrintInventory();
+  const { settings, update: updateSettings } = useSettings();
 
   return (
     <div className="h-dvh flex flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white overflow-hidden">
@@ -33,6 +35,9 @@ function App() {
           printEnriched={printEnriched}
           onUpsertPrintItem={upsertPrintItem}
           onRemovePrintItem={removePrintItem}
+          onThemeToggle={toggle}
+          settings={settings}
+          updateSettings={updateSettings}
         />
       </div>
       <BottomNav activeView={activeView} onViewChange={setActiveView} />
