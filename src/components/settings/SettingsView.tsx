@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { SettingsNav, SETTINGS_SECTIONS } from './SettingsNav';
 import type { AppSettings, SettingsUpdate } from '@/hooks/useSettings';
+import { ShopProfileSection } from './sections/ShopProfileSection';
+import { PrintingDefaultsSection } from './sections/PrintingDefaultsSection';
 
 function PlaceholderSection({ label }: { label: string }) {
   return (
@@ -23,15 +25,15 @@ export function SettingsView({ settings, update, isDark, onThemeToggle }: Settin
     window.matchMedia('(min-width: 768px)').matches ? 'shop-profile' : ''
   );
 
-  // Props will be fully consumed in Tasks 4-9 when PlaceholderSections are replaced
-  void settings; void update; void isDark; void onThemeToggle;
+  // Props will be fully consumed in Tasks 6-9 when remaining PlaceholderSections are replaced
+  void isDark; void onThemeToggle;
 
   const activeSection = SETTINGS_SECTIONS.find((s) => s.id === activeSectionId);
 
   function renderSection() {
     switch (activeSectionId) {
-      case 'shop-profile':     return <PlaceholderSection label="Shop Profile" />;
-      case 'printing':         return <PlaceholderSection label="Printing Defaults" />;
+      case 'shop-profile':     return <ShopProfileSection settings={settings} update={update} />;
+      case 'printing':         return <PrintingDefaultsSection settings={settings} update={update} />;
       case 'etsy-fees':        return <PlaceholderSection label="Etsy Fees" />;
       case 'inventory-alerts': return <PlaceholderSection label="Inventory Alerts" />;
       case 'appearance':       return <PlaceholderSection label="Appearance" />;
