@@ -1,13 +1,18 @@
 import { useState } from 'react';
 import { Plus, Package, DollarSign, AlertTriangle, AlertCircle } from 'lucide-react';
-import { usePrintInventory } from '@/hooks/usePrintInventory';
 import { PrintInventoryTable } from './PrintInventoryTable';
 import { PrintItemForm } from './PrintItemForm';
 import { KpiCard } from '@/components/kpi/KpiCard';
-import type { PrintItemWithStatus } from '@/types/printInventory';
+import type { PrintItemWithStatus, PrintItem } from '@/types/printInventory';
 
-export function PrintInventoryView() {
-  const { enriched, upsert, remove, kpis } = usePrintInventory();
+interface PrintInventoryViewProps {
+  enriched: PrintItemWithStatus[];
+  upsert: (item: PrintItem) => void;
+  remove: (id: string) => void;
+  kpis: { total: number; critical: number; warning: number; totalValue: number };
+}
+
+export function PrintInventoryView({ enriched, upsert, remove, kpis }: PrintInventoryViewProps) {
   const [editTarget, setEditTarget] = useState<PrintItemWithStatus | null | 'new'>(null);
 
   const modalItem = editTarget === 'new' ? null : editTarget;

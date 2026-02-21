@@ -6,6 +6,7 @@ import { Dashboard } from '@/pages/Dashboard';
 import { useInventoryMetrics } from '@/hooks/useInventoryMetrics';
 import { useTheme } from '@/hooks/useTheme';
 import { useSalesOrders } from '@/hooks/useSalesOrders';
+import { usePrintInventory } from '@/hooks/usePrintInventory';
 
 export type View = 'dashboard' | 'inventory' | 'orders' | 'listings' | 'seo' | 'salesmap' | 'margin';
 
@@ -14,6 +15,7 @@ function App() {
   const { criticalCount } = useInventoryMetrics();
   const { isDark, toggle } = useTheme();
   const { orders: salesOrders, merge: mergeSalesOrders, clear: clearSalesOrders } = useSalesOrders();
+  const { enriched: printEnriched, upsert: upsertPrintItem, remove: removePrintItem, kpis: printKpis } = usePrintInventory();
 
   return (
     <div className="h-dvh flex flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white overflow-hidden">
@@ -27,6 +29,10 @@ function App() {
           onMergeSalesOrders={mergeSalesOrders}
           onClearSalesOrders={clearSalesOrders}
           onNavigate={setActiveView}
+          printKpis={printKpis}
+          printEnriched={printEnriched}
+          onUpsertPrintItem={upsertPrintItem}
+          onRemovePrintItem={removePrintItem}
         />
       </div>
       <BottomNav activeView={activeView} onViewChange={setActiveView} />

@@ -1,9 +1,9 @@
 import { useInventoryMetrics } from '@/hooks/useInventoryMetrics';
-import { usePrintInventory } from '@/hooks/usePrintInventory';
 import { useDashboardSalesMetrics } from '@/hooks/useDashboardSalesMetrics';
 import type { View } from '@/App';
 import type { EtsyOrderItem } from '@/types';
 import type { MergeResult } from '@/hooks/useSalesOrders';
+import type { PrintItemWithStatus, PrintItem } from '@/types/printInventory';
 
 import { PrintInventoryView } from '@/components/inventory/PrintInventoryView';
 import { OrderHistoryView } from '@/components/orders/OrderHistoryView';
@@ -23,12 +23,15 @@ interface DashboardProps {
   onMergeSalesOrders: (records: EtsyOrderItem[]) => MergeResult;
   onClearSalesOrders: () => void;
   onNavigate: (view: View) => void;
+  printKpis: { total: number; critical: number; warning: number; totalValue: number };
+  printEnriched: PrintItemWithStatus[];
+  onUpsertPrintItem: (item: PrintItem) => void;
+  onRemovePrintItem: (id: string) => void;
 }
 
-export function Dashboard({ activeView, isDark, salesOrders, onMergeSalesOrders, onClearSalesOrders, onNavigate }: DashboardProps) {
+export function Dashboard({ activeView, isDark, salesOrders, onMergeSalesOrders, onClearSalesOrders, onNavigate, printKpis, printEnriched, onUpsertPrintItem, onRemovePrintItem }: DashboardProps) {
   const metrics = useInventoryMetrics();
 
-  const { kpis: printKpis } = usePrintInventory();
   const salesMetrics = useDashboardSalesMetrics(salesOrders);
   const totalUniqueOrders = new Set(salesOrders.map((o) => o.orderId)).size;
   const combinedCritical = metrics.criticalCount + printKpis.critical;
@@ -68,7 +71,12 @@ export function Dashboard({ activeView, isDark, salesOrders, onMergeSalesOrders,
 
         {activeView === 'inventory' && (
           <PageSection title="Print Inventory">
-            <PrintInventoryView />
+            <PrintInventoryView
+              enriched={printEnriched}
+              upsert={onUpsertPrintItem}
+              remove={onRemovePrintItem}
+              kpis={printKpis}
+            />
           </PageSection>
         )}
 
