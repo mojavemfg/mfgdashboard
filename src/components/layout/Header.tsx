@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Bell, Sun, Moon, Menu, Settings, LogOut, AlertOctagon, AlertTriangle, ShoppingBag, CheckCircle2 } from 'lucide-react';
+import { Bell, Sun, Moon, Menu, LogOut, AlertOctagon, AlertTriangle, ShoppingBag, CheckCircle2 } from 'lucide-react';
 import type { View } from '@/App';
 
 export interface NotificationAlert {
@@ -230,13 +230,6 @@ export function Header({
 
           {avatar.open && (
             <div className="absolute right-0 top-full mt-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] py-1 min-w-[160px] z-50">
-              <button
-                onClick={() => { onNavigate?.('settings'); avatar.setOpen(false); }}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text-primary)] transition-colors"
-              >
-                <Settings size={14} />
-                Settings
-              </button>
               <button className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text-primary)] transition-colors">
                 <LogOut size={14} />
                 Sign Out

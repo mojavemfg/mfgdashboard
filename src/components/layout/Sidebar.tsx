@@ -1,8 +1,7 @@
-import { useState } from 'react';
 import {
   LayoutDashboard, PackageSearch, ShoppingCart, LayoutList,
-  Tag, Map, Calculator, Settings, Factory, ChevronDown,
-  LogOut, X,
+  Tag, Map, Calculator, Settings, Factory,
+  X,
 } from 'lucide-react';
 import type { View } from '@/App';
 
@@ -145,21 +144,13 @@ function SidebarContent({
   companyName?: string;
   logoUrl?: string;
 }) {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const sections = buildSections(navItems);
 
   return (
     <div className="flex flex-col h-full">
-      {/* Brand / workspace header */}
+      {/* Brand header — static, non-interactive */}
       <div className="px-3 py-4 border-b border-[var(--color-border)]">
-        <button
-          onClick={() => setDropdownOpen(!dropdownOpen)}
-          className={[
-            'flex items-center gap-2 w-full px-2 py-1.5 rounded-[var(--radius-md)]',
-            'hover:bg-[var(--color-bg-subtle)] transition-colors duration-150',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]',
-          ].join(' ')}
-        >
+        <div className="flex items-center gap-2 px-2 py-1.5">
           {logoUrl ? (
             <img src={logoUrl} alt="" className="w-6 h-6 rounded-sm object-contain shrink-0" />
           ) : (
@@ -170,27 +161,7 @@ function SidebarContent({
           <span className="text-sm font-semibold text-[var(--color-text-primary)] flex-1 text-left truncate">
             {companyName || 'MFG Ops'}
           </span>
-          <ChevronDown
-            size={14}
-            className={`text-[var(--color-text-tertiary)] transition-transform duration-150 ${dropdownOpen ? 'rotate-180' : ''}`}
-          />
-        </button>
-
-        {dropdownOpen && (
-          <div className="mt-1 mx-2 border border-[var(--color-border)] rounded-[var(--radius-md)] bg-[var(--color-bg)] shadow-[var(--shadow-sm)] overflow-hidden">
-            <button
-              onClick={() => { onViewChange('settings'); setDropdownOpen(false); }}
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text-primary)] transition-colors"
-            >
-              <Settings size={14} />
-              Settings
-            </button>
-            <button className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text-primary)] transition-colors">
-              <LogOut size={14} />
-              Sign Out
-            </button>
-          </div>
-        )}
+        </div>
       </div>
 
       {/* Nav */}
