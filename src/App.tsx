@@ -52,7 +52,7 @@ function App() {
         id: `comp-crit-${c.id}`,
         severity: 'critical',
         title: c.name,
-        detail: `${c.currentStock} ${c.unit} in stock · reorder at ${c.reorderPoint}`,
+        detail: `${c.currentStock} ${c.unit} in stock · reorder at ${Math.round(c.reorderPoint)}`,
         view: 'inventory',
       });
     }
@@ -63,7 +63,7 @@ function App() {
         id: `print-crit-${p.id}`,
         severity: 'critical',
         title: p.name,
-        detail: `${p.currentStock} ${p.unit} in stock`,
+        detail: `${p.currentStock} ${p.unit} in stock · safety: ${p.safetyStock} ${p.unit}`,
         view: 'inventory',
       });
     }
@@ -87,7 +87,7 @@ function App() {
         id: `print-warn-${p.id}`,
         severity: 'warning',
         title: p.name,
-        detail: `${p.currentStock} ${p.unit} in stock`,
+        detail: `${p.currentStock} ${p.unit} in stock · safety: ${p.safetyStock} ${p.unit}`,
         view: 'inventory',
       });
     }
