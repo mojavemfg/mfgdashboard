@@ -4,7 +4,6 @@ import type { NotificationAlert } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Dashboard } from '@/pages/Dashboard';
 import { ToastProvider } from '@/components/ui/Toast';
-import { useInventoryMetrics } from '@/hooks/useInventoryMetrics';
 import { useTheme } from '@/hooks/useTheme';
 import { useSalesOrders } from '@/hooks/useSalesOrders';
 import { usePrintInventory } from '@/hooks/usePrintInventory';
@@ -28,7 +27,6 @@ function App() {
   const [activeView, setActiveView] = useState<View>('dashboard');
   const sidebar = useSidebar(activeView);
 
-  const { enrichedComponents } = useInventoryMetrics();
   const { isDark, toggle } = useTheme();
   const { orders: salesOrders, merge: mergeSalesOrders, clear: clearSalesOrders } = useSalesOrders();
   const { settings, update: updateSettings } = useSettings();
@@ -42,20 +40,9 @@ function App() {
     settings.inventory.warningMultiplier,
   );
 
-  // Build notification alerts from all data sources
+  // Build notification alerts from visible inventory sources only
   const alerts = useMemo<NotificationAlert[]>(() => {
     const list: NotificationAlert[] = [];
-
-    // Critical component inventory
-    for (const c of enrichedComponents.filter(c => c.status === 'Critical')) {
-      list.push({
-        id: `comp-crit-${c.id}`,
-        severity: 'critical',
-        title: c.name,
-        detail: `${c.currentStock} ${c.unit} in stock · reorder at ${Math.round(c.reorderPoint)}`,
-        view: 'inventory',
-      });
-    }
 
     // Critical print inventory
     for (const p of printEnriched.filter(p => p.status === 'Critical')) {
@@ -64,19 +51,6 @@ function App() {
         severity: 'critical',
         title: p.name,
         detail: `${p.currentStock} ${p.unit} in stock · safety: ${p.safetyStock} ${p.unit}`,
-        view: 'inventory',
-      });
-    }
-
-    // Warning component inventory
-    for (const c of enrichedComponents.filter(c => c.status === 'Warning')) {
-      list.push({
-        id: `comp-warn-${c.id}`,
-        severity: 'warning',
-        title: c.name,
-        detail: c.daysUntilReorder === Infinity
-          ? `${c.currentStock} ${c.unit} · no consumption data`
-          : `${c.currentStock} ${c.unit} · reorder in ~${Math.round(c.daysUntilReorder)}d`,
         view: 'inventory',
       });
     }
@@ -107,7 +81,7 @@ function App() {
     }
 
     return list;
-  }, [enrichedComponents, printEnriched, salesOrders]);
+  }, [printEnriched, salesOrders]);
 
   return (
     <ToastProvider>
