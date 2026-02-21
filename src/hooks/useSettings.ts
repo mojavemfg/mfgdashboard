@@ -59,7 +59,7 @@ function loadSettings(): AppSettings {
       } as AppSettings;
     }
   } catch (e) {
-    if (process.env.NODE_ENV !== 'production') {
+    if (import.meta.env.DEV) {
       console.warn('[useSettings] Failed to parse localStorage settings:', e);
     }
   }

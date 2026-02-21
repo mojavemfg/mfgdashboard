@@ -16,8 +16,8 @@ const mainNavItems: { id: View; label: string; Icon: React.ComponentType<{ size?
   { id: 'margin',    label: 'Margin Calc',  Icon: Calculator, accent: 'emerald' },
 ];
 
-function NavButton({ id, label, Icon, accent, active, onClick }: {
-  id: View; label: string; Icon: React.ComponentType<{ size?: number; className?: string }>;
+function NavButton({ label, Icon, accent, active, onClick }: {
+  id?: View; label: string; Icon: React.ComponentType<{ size?: number; className?: string }>;
   accent?: string; active: boolean; onClick: () => void;
 }) {
   const activeBg =
