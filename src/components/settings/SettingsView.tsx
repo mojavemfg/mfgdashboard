@@ -4,6 +4,7 @@ import { SettingsNav, SETTINGS_SECTIONS } from './SettingsNav';
 import type { AppSettings, SettingsUpdate } from '@/hooks/useSettings';
 import { ShopProfileSection } from './sections/ShopProfileSection';
 import { PrintingDefaultsSection } from './sections/PrintingDefaultsSection';
+import { EtsyFeesSection } from './sections/EtsyFeesSection';
 
 function PlaceholderSection({ label }: { label: string }) {
   return (
@@ -34,7 +35,7 @@ export function SettingsView({ settings, update, isDark, onThemeToggle }: Settin
     switch (activeSectionId) {
       case 'shop-profile':     return <ShopProfileSection settings={settings} update={update} />;
       case 'printing':         return <PrintingDefaultsSection settings={settings} update={update} />;
-      case 'etsy-fees':        return <PlaceholderSection label="Etsy Fees" />;
+      case 'etsy-fees':        return <EtsyFeesSection settings={settings} update={update} />;
       case 'inventory-alerts': return <PlaceholderSection label="Inventory Alerts" />;
       case 'appearance':       return <PlaceholderSection label="Appearance" />;
       case 'data-management':  return <PlaceholderSection label="Data Management" />;

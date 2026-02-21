@@ -113,7 +113,7 @@ export function Dashboard({ activeView, isDark, salesOrders, onMergeSalesOrders,
         )}
 
         {activeView === 'margin' && (
-          <MarginCalculatorView />
+          <MarginCalculatorView settings={settings} />
         )}
 
         {activeView === 'settings' && (

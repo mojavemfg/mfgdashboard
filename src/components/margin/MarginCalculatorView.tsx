@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { Calculator, Plus, X, Pencil, Check, Trash2 } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import type { AppSettings } from '@/hooks/useSettings';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -101,46 +102,63 @@ export function calcCosts(
     kwHRate: number;
     packagingItems: PackagingItem[];
     hardwareItems: HardwareItem[];
-  }
+  },
+  listingFee: number = LISTING_FEE
 ) {
   const fil = filaments.find((f) => f.id === state.filamentId);
   const filamentCost    = fil ? (state.filamentGrams / 1000) * fil.costPerKg : 0;
   const electricityCost = state.printHours * (state.printerWatts / 1000) * state.kwHRate;
   const hardwareCost    = state.hardwareItems.reduce((s, h) => s + h.cost, 0);
   const packagingCost   = state.packagingItems.reduce((s, p) => s + p.cost, 0);
-  const baseCost        = filamentCost + electricityCost + packagingCost + hardwareCost + LISTING_FEE;
+  const baseCost        = filamentCost + electricityCost + packagingCost + hardwareCost + listingFee;
   return { filamentCost, electricityCost, hardwareCost, packagingCost, baseCost };
 }
 
-export function marginFromPrice(baseCost: number, salePrice: number, withEtsy = true) {
+export function marginFromPrice(
+  baseCost: number,
+  salePrice: number,
+  withEtsy = true,
+  transactionRate: number = TRANSACTION_RATE,
+  processingRate: number = PROCESSING_RATE,
+  processingFixed: number = PROCESSING_FIXED,
+) {
   if (salePrice <= 0) return 0;
   const fees = withEtsy
-    ? salePrice * TRANSACTION_RATE + salePrice * PROCESSING_RATE + PROCESSING_FIXED
+    ? salePrice * transactionRate + salePrice * processingRate + processingFixed
     : 0;
   return (salePrice - baseCost - fees) / salePrice;
 }
 
-export function priceFromMargin(baseCost: number, targetMargin: number, withEtsy = true) {
+export function priceFromMargin(
+  baseCost: number,
+  targetMargin: number,
+  withEtsy = true,
+  transactionRate: number = TRANSACTION_RATE,
+  processingRate: number = PROCESSING_RATE,
+  processingFixed: number = PROCESSING_FIXED,
+) {
   if (!withEtsy) {
     const denom = 1 - targetMargin;
     return denom <= 0 ? 0 : baseCost / denom;
   }
-  const denom = 1 - TRANSACTION_RATE - PROCESSING_RATE - targetMargin;
+  const denom = 1 - transactionRate - processingRate - targetMargin;
   if (denom <= 0) return 0;
-  return (baseCost + PROCESSING_FIXED) / denom;
+  return (baseCost + processingFixed) / denom;
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-const BLANK_STATE = {
-  filamentId: 'pla',
-  filamentGrams: 100,
-  printHours: 4,
-  printerWatts: 250,
-  kwHRate: 0.13,
-  packagingItems: [{ id: 'pkg-default', name: 'Box / Mailer', cost: 0.75 }] as PackagingItem[],
-  hardwareItems: [] as HardwareItem[],
-};
+function getBlankState(settings?: AppSettings) {
+  return {
+    filamentId: 'pla',
+    filamentGrams: 100,
+    printHours: 4,
+    printerWatts: settings?.printing.defaultWatts ?? 250,
+    kwHRate: settings?.printing.defaultKwhRate ?? 0.13,
+    packagingItems: [{ id: 'pkg-default', name: 'Box / Mailer', cost: 0.75 }] as PackagingItem[],
+    hardwareItems: [] as HardwareItem[],
+  };
+}
 
 // ─── ResultsPanel ─────────────────────────────────────────────────────────────
 
@@ -158,19 +176,25 @@ interface ResultsPanelProps {
   etsyEnabled: boolean;
   onPriceChange: (v: number) => void;
   onMarginChange: (v: number) => void;
+  liveFees: {
+    listingFee: number;
+    transactionRate: number;
+    processingRate: number;
+    processingFixed: number;
+  };
 }
 
 function ResultsPanel({
   baseCost, filamentCost, electricityCost, hardwareCost, packagingCost,
   salePrice, targetMargin, lastEdited, displayMargin, displayPrice,
-  etsyEnabled, onPriceChange, onMarginChange,
+  etsyEnabled, onPriceChange, onMarginChange, liveFees,
 }: ResultsPanelProps) {
   const activeSalePrice = lastEdited === 'price' ? salePrice : displayPrice;
   const activeMargin    = lastEdited === 'margin' ? targetMargin : displayMargin;
 
   const etsyFees =
     etsyEnabled && activeSalePrice > 0
-      ? activeSalePrice * TRANSACTION_RATE + activeSalePrice * PROCESSING_RATE + PROCESSING_FIXED
+      ? activeSalePrice * liveFees.transactionRate + activeSalePrice * liveFees.processingRate + liveFees.processingFixed
       : 0;
   const profit = activeSalePrice > 0 ? activeSalePrice - baseCost - etsyFees : 0;
 
@@ -284,17 +308,17 @@ function ResultsPanel({
   );
 }
 
-export function MarginCalculatorView() {
+export function MarginCalculatorView({ settings }: { settings?: AppSettings }) {
   const [filaments, setFilaments] = useState<FilamentPreset[]>(loadFilaments);
   const [presets, setPresets]     = useState<ProductPreset[]>(loadPresets);
 
   // Working state
-  const [filamentId, setFilamentId]       = useState(BLANK_STATE.filamentId);
-  const [filamentGrams, setFilamentGrams] = useState(BLANK_STATE.filamentGrams);
-  const [printHours, setPrintHours]       = useState(BLANK_STATE.printHours);
-  const [printerWatts, setPrinterWatts]   = useState(BLANK_STATE.printerWatts);
-  const [kwHRate, setKwHRate]             = useState(BLANK_STATE.kwHRate);
-  const [packagingItems, setPackagingItems] = useState<PackagingItem[]>(BLANK_STATE.packagingItems);
+  const [filamentId, setFilamentId]       = useState(() => getBlankState(settings).filamentId);
+  const [filamentGrams, setFilamentGrams] = useState(() => getBlankState(settings).filamentGrams);
+  const [printHours, setPrintHours]       = useState(() => getBlankState(settings).printHours);
+  const [printerWatts, setPrinterWatts]   = useState(() => settings?.printing.defaultWatts ?? 250);
+  const [kwHRate, setKwHRate]             = useState(() => settings?.printing.defaultKwhRate ?? 0.13);
+  const [packagingItems, setPackagingItems] = useState<PackagingItem[]>(() => getBlankState(settings).packagingItems);
   const [hardwareItems, setHardwareItems]   = useState<HardwareItem[]>([]);
   const [etsyEnabled, setEtsyEnabled]       = useState(true);
 
@@ -308,25 +332,33 @@ export function MarginCalculatorView() {
   const [saveNameDraft, setSaveNameDraft]   = useState('');
   const [showSaveInput, setShowSaveInput]   = useState(false);
 
+  // Live fee values from settings, falling back to exported constants
+  const liveFees = {
+    listingFee:      settings?.etsyFees.listingFee      ?? LISTING_FEE,
+    transactionRate: settings?.etsyFees.transactionRate ?? TRANSACTION_RATE,
+    processingRate:  settings?.etsyFees.processingRate  ?? PROCESSING_RATE,
+    processingFixed: settings?.etsyFees.processingFixed ?? PROCESSING_FIXED,
+  };
+
   const currentState = { filamentId, filamentGrams, printHours, printerWatts, kwHRate, packagingItems, hardwareItems };
-  const { filamentCost, electricityCost, hardwareCost, packagingCost, baseCost } = calcCosts(filaments, currentState);
+  const { filamentCost, electricityCost, hardwareCost, packagingCost, baseCost } = calcCosts(filaments, currentState, liveFees.listingFee);
 
-  // When Etsy fees are disabled, remove the fixed LISTING_FEE from the effective cost basis
-  const effectiveBaseCost = etsyEnabled ? baseCost : baseCost - LISTING_FEE;
+  // When Etsy fees are disabled, remove the fixed listingFee from the effective cost basis
+  const effectiveBaseCost = etsyEnabled ? baseCost : baseCost - liveFees.listingFee;
 
-  const displayMargin = marginFromPrice(effectiveBaseCost, salePrice, etsyEnabled) * 100;
-  const displayPrice  = priceFromMargin(effectiveBaseCost, targetMargin / 100, etsyEnabled);
+  const displayMargin = marginFromPrice(effectiveBaseCost, salePrice, etsyEnabled, liveFees.transactionRate, liveFees.processingRate, liveFees.processingFixed) * 100;
+  const displayPrice  = priceFromMargin(effectiveBaseCost, targetMargin / 100, etsyEnabled, liveFees.transactionRate, liveFees.processingRate, liveFees.processingFixed);
 
   function handlePriceChange(val: number) {
     setSalePrice(val);
     setLastEdited('price');
-    setTargetMargin(Math.round(marginFromPrice(effectiveBaseCost, val, etsyEnabled) * 1000) / 10);
+    setTargetMargin(Math.round(marginFromPrice(effectiveBaseCost, val, etsyEnabled, liveFees.transactionRate, liveFees.processingRate, liveFees.processingFixed) * 1000) / 10);
   }
 
   function handleMarginChange(val: number) {
     setTargetMargin(val);
     setLastEdited('margin');
-    setSalePrice(Math.round(priceFromMargin(effectiveBaseCost, val / 100, etsyEnabled) * 100) / 100);
+    setSalePrice(Math.round(priceFromMargin(effectiveBaseCost, val / 100, etsyEnabled, liveFees.transactionRate, liveFees.processingRate, liveFees.processingFixed) * 100) / 100);
   }
 
   function loadPreset(id: string) {
@@ -362,12 +394,13 @@ export function MarginCalculatorView() {
   }
 
   function resetState() {
-    setFilamentId(BLANK_STATE.filamentId);
-    setFilamentGrams(BLANK_STATE.filamentGrams);
-    setPrintHours(BLANK_STATE.printHours);
-    setPrinterWatts(BLANK_STATE.printerWatts);
-    setKwHRate(BLANK_STATE.kwHRate);
-    setPackagingItems(BLANK_STATE.packagingItems);
+    const blank = getBlankState(settings);
+    setFilamentId(blank.filamentId);
+    setFilamentGrams(blank.filamentGrams);
+    setPrintHours(blank.printHours);
+    setPrinterWatts(blank.printerWatts);
+    setKwHRate(blank.kwHRate);
+    setPackagingItems(blank.packagingItems);
     setHardwareItems([]);
   }
 
@@ -752,15 +785,15 @@ export function MarginCalculatorView() {
         <div className={`space-y-2 text-xs text-slate-500 dark:text-slate-400 transition-opacity ${!etsyEnabled ? 'opacity-40' : ''}`}>
           <div className="flex items-center justify-between">
             <span>Listing fee (per sale)</span>
-            <span className="font-mono tabular-nums">${LISTING_FEE.toFixed(2)}</span>
+            <span className="font-mono tabular-nums">${liveFees.listingFee.toFixed(2)}</span>
           </div>
           <div className="flex items-center justify-between">
             <span>Transaction fee</span>
-            <span className="font-mono tabular-nums">{(TRANSACTION_RATE * 100).toFixed(1)}%</span>
+            <span className="font-mono tabular-nums">{(liveFees.transactionRate * 100).toFixed(1)}%</span>
           </div>
           <div className="flex items-center justify-between">
             <span>Payment processing</span>
-            <span className="font-mono tabular-nums">{(PROCESSING_RATE * 100)}% + ${PROCESSING_FIXED.toFixed(2)}</span>
+            <span className="font-mono tabular-nums">{(liveFees.processingRate * 100)}% + ${liveFees.processingFixed.toFixed(2)}</span>
           </div>
           <p className="text-slate-400 dark:text-slate-500 pt-1">
             {etsyEnabled
@@ -785,6 +818,7 @@ export function MarginCalculatorView() {
         etsyEnabled={etsyEnabled}
         onPriceChange={handlePriceChange}
         onMarginChange={handleMarginChange}
+        liveFees={liveFees}
       />
     </div>
   );
