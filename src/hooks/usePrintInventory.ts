@@ -4,9 +4,9 @@ import { printInventorySeed } from '@/data/printInventory';
 
 const STORAGE_KEY = 'mfg-print-inventory';
 
-function deriveStatus(item: PrintItem): PrintStatus {
-  if (item.currentStock < item.safetyStock) return 'Critical';
-  if (item.currentStock < item.safetyStock * 1.5) return 'Warning';
+function deriveStatus(item: PrintItem, critMulti: number, warnMulti: number): PrintStatus {
+  if (item.currentStock < item.safetyStock * critMulti) return 'Critical';
+  if (item.currentStock < item.safetyStock * warnMulti) return 'Warning';
   return 'OK';
 }
 
@@ -28,15 +28,15 @@ function save(items: PrintItem[]) {
   }
 }
 
-export function usePrintInventory() {
+export function usePrintInventory(criticalMultiplier = 1.0, warningMultiplier = 1.5) {
   const [items, setItems] = useState<PrintItem[]>(load);
 
   const enriched = useMemo<PrintItemWithStatus[]>(() =>
     items.map((item) => ({
       ...item,
-      status: deriveStatus(item),
+      status: deriveStatus(item, criticalMultiplier, warningMultiplier),
       totalValue: item.currentStock * (item.unitCost ?? 0),
-    })), [items]);
+    })), [items, criticalMultiplier, warningMultiplier]);
 
   const upsert = useCallback((item: PrintItem) => {
     setItems((prev) => {

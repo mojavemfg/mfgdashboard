@@ -16,8 +16,11 @@ function App() {
   const { criticalCount } = useInventoryMetrics();
   const { isDark, toggle } = useTheme();
   const { orders: salesOrders, merge: mergeSalesOrders, clear: clearSalesOrders } = useSalesOrders();
-  const { enriched: printEnriched, upsert: upsertPrintItem, remove: removePrintItem, kpis: printKpis } = usePrintInventory();
   const { settings, update: updateSettings } = useSettings();
+  const { enriched: printEnriched, upsert: upsertPrintItem, remove: removePrintItem, kpis: printKpis } = usePrintInventory(
+    settings.inventory.criticalMultiplier,
+    settings.inventory.warningMultiplier,
+  );
 
   return (
     <div className="h-dvh flex flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white overflow-hidden">

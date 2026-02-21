@@ -5,14 +5,9 @@ import type { AppSettings, SettingsUpdate } from '@/hooks/useSettings';
 import { ShopProfileSection } from './sections/ShopProfileSection';
 import { PrintingDefaultsSection } from './sections/PrintingDefaultsSection';
 import { EtsyFeesSection } from './sections/EtsyFeesSection';
-
-function PlaceholderSection({ label }: { label: string }) {
-  return (
-    <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/50 p-6">
-      <p className="text-slate-400 dark:text-slate-500 text-sm">{label} — coming soon</p>
-    </div>
-  );
-}
+import { InventoryAlertsSection } from './sections/InventoryAlertsSection';
+import { AppearanceSection } from './sections/AppearanceSection';
+import { DataManagementSection } from './sections/DataManagementSection';
 
 interface SettingsViewProps {
   settings: AppSettings;
@@ -26,9 +21,6 @@ export function SettingsView({ settings, update, isDark, onThemeToggle }: Settin
     window.matchMedia('(min-width: 768px)').matches ? 'shop-profile' : ''
   );
 
-  // Props will be fully consumed in Tasks 6-9 when remaining PlaceholderSections are replaced
-  void isDark; void onThemeToggle;
-
   const activeSection = SETTINGS_SECTIONS.find((s) => s.id === activeSectionId);
 
   function renderSection() {
@@ -36,9 +28,9 @@ export function SettingsView({ settings, update, isDark, onThemeToggle }: Settin
       case 'shop-profile':     return <ShopProfileSection settings={settings} update={update} />;
       case 'printing':         return <PrintingDefaultsSection settings={settings} update={update} />;
       case 'etsy-fees':        return <EtsyFeesSection settings={settings} update={update} />;
-      case 'inventory-alerts': return <PlaceholderSection label="Inventory Alerts" />;
-      case 'appearance':       return <PlaceholderSection label="Appearance" />;
-      case 'data-management':  return <PlaceholderSection label="Data Management" />;
+      case 'inventory-alerts': return <InventoryAlertsSection settings={settings} update={update} />;
+      case 'appearance':       return <AppearanceSection isDark={isDark} onThemeToggle={onThemeToggle} />;
+      case 'data-management':  return <DataManagementSection />;
       default:                 return null;
     }
   }
