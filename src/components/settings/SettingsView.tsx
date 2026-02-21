@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { ChevronLeft } from 'lucide-react';
 import { SettingsNav, SETTINGS_SECTIONS } from './SettingsNav';
 import type { AppSettings, SettingsUpdate } from '@/hooks/useSettings';
 import { ShopProfileSection } from './sections/ShopProfileSection';
@@ -17,11 +16,7 @@ interface SettingsViewProps {
 }
 
 export function SettingsView({ settings, update, isDark, onThemeToggle }: SettingsViewProps) {
-  const [activeSectionId, setActiveSectionId] = useState(() =>
-    window.matchMedia('(min-width: 768px)').matches ? 'shop-profile' : ''
-  );
-
-  const activeSection = SETTINGS_SECTIONS.find((s) => s.id === activeSectionId);
+  const [activeSectionId, setActiveSectionId] = useState('shop-profile');
 
   function renderSection() {
     switch (activeSectionId) {
@@ -36,46 +31,42 @@ export function SettingsView({ settings, update, isDark, onThemeToggle }: Settin
   }
 
   return (
-    <div className="max-w-4xl pb-24 lg:pb-8">
+    <div className="max-w-4xl pb-8">
       {/* Page header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight text-[var(--color-text-primary)]">Settings</h1>
-          <p className="text-sm text-[var(--color-text-secondary)] mt-0.5">
-            Manage your shop configuration and preferences
-          </p>
-        </div>
+      <div className="mb-6">
+        <h1 className="text-xl font-semibold tracking-tight text-[var(--color-text-primary)]">Settings</h1>
+        <p className="text-sm text-[var(--color-text-secondary)] mt-0.5">
+          Manage your shop configuration and preferences
+        </p>
       </div>
 
+      {/* Mobile tab navigation — select dropdown (< md) */}
+      <div className="md:hidden mb-4">
+        <select
+          value={activeSectionId}
+          onChange={(e) => setActiveSectionId(e.target.value)}
+          className={[
+            'w-full h-8 px-3 text-sm rounded-[var(--radius-md)]',
+            'border border-[var(--color-border)] bg-[var(--color-bg)]',
+            'text-[var(--color-text-primary)]',
+            'focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]',
+          ].join(' ')}
+        >
+          {SETTINGS_SECTIONS.map(({ id, label }) => (
+            <option key={id} value={id}>{label}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Desktop/tablet two-panel layout (md+) */}
       <div className="flex gap-6">
-        {/* Left nav */}
-        <div className={`shrink-0 ${activeSectionId ? 'hidden md:block' : 'block'}`}>
+        {/* Left nav — only on md+ */}
+        <div className="hidden md:block shrink-0">
           <SettingsNav activeSectionId={activeSectionId} onSelect={setActiveSectionId} />
         </div>
 
         {/* Content */}
-        <div className={`flex-1 min-w-0 max-w-xl ${!activeSectionId ? 'hidden md:block' : 'block'}`}>
-          {/* Mobile back button */}
-          <button
-            onClick={() => setActiveSectionId('')}
-            className={[
-              'md:hidden flex items-center gap-1.5 text-sm font-medium mb-4',
-              'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]',
-              'transition-colors duration-150 focus-visible:outline-none',
-            ].join(' ')}
-          >
-            <ChevronLeft size={16} />
-            Settings
-          </button>
-
-          {activeSection && (
-            <div className="mb-4">
-              <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">
-                {activeSection.label}
-              </h2>
-            </div>
-          )}
-
+        <div className="flex-1 min-w-0 max-w-xl">
           {renderSection()}
         </div>
       </div>

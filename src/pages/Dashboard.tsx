@@ -47,7 +47,7 @@ export function Dashboard({
 
   return (
     <main className="flex-1 overflow-y-auto bg-[var(--color-bg-subtle)]">
-      <div className="px-4 lg:px-6 pt-6 pb-24 lg:pb-8 max-w-[1440px]">
+      <div className="px-4 md:px-6 lg:px-8 pt-6 pb-8 max-w-[1440px]">
         {activeView === 'dashboard' && (
           <>
             <PageSection title="Alerts">

@@ -115,10 +115,10 @@ export function PrintItemForm({ initial, onSave, onDelete, onClose }: Props) {
           )
         )}
       </div>
-      {/* Right: cancel / save */}
-      <div className="flex gap-2">
-        <Button variant="secondary" size="md" onClick={onClose}>Cancel</Button>
-        <Button variant="primary" size="md" type="submit" form="print-item-form">
+      {/* Right: cancel / save — stacked full-width on mobile, inline on md+ */}
+      <div className="flex flex-col-reverse md:flex-row gap-2 w-full md:w-auto">
+        <Button variant="secondary" size="md" onClick={onClose} className="w-full md:w-auto">Cancel</Button>
+        <Button variant="primary" size="md" type="submit" form="print-item-form" className="w-full md:w-auto">
           {isEdit ? 'Save Changes' : 'Add Item'}
         </Button>
       </div>
@@ -152,7 +152,7 @@ export function PrintItemForm({ initial, onSave, onDelete, onClose }: Props) {
         </Field>
 
         {form.category === 'Filament' && (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
             <Field label="Material">
               <Select value={form.material ?? 'PLA'} onChange={(e) => set('material', e.target.value)}>
                 {MATERIALS.map((m) => <option key={m} value={m}>{m}</option>)}
@@ -169,7 +169,7 @@ export function PrintItemForm({ initial, onSave, onDelete, onClose }: Props) {
         )}
 
         {form.category === 'Insert' && (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
             <Field label="Insert Size">
               <Select value={form.insertSize ?? 'M3'} onChange={(e) => set('insertSize', e.target.value)}>
                 {INSERT_SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -183,7 +183,7 @@ export function PrintItemForm({ initial, onSave, onDelete, onClose }: Props) {
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
           <Field label="Current Stock *">
             <Input
               required
@@ -203,7 +203,7 @@ export function PrintItemForm({ initial, onSave, onDelete, onClose }: Props) {
           </Field>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
           <Field label="Safety Stock *">
             <Input
               required
@@ -234,7 +234,7 @@ export function PrintItemForm({ initial, onSave, onDelete, onClose }: Props) {
           />
         </Field>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-3">
           <Field label="Supplier">
             <Input
               value={form.supplier ?? ''}

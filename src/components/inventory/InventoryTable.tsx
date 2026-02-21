@@ -55,8 +55,8 @@ export function InventoryTable({ components }: InventoryTableProps) {
     <div>
       <InventorySearch filters={filters} onChange={setFilters} />
 
-      {/* Mobile card view */}
-      <div className="sm:hidden flex flex-col gap-2">
+      {/* Mobile card view — phones only (< 768px) */}
+      <div className="md:hidden flex flex-col gap-2">
         {sorted.map((c) => (
           <div key={c.id} className="bg-[var(--color-bg)] rounded-[var(--radius-lg)] border border-[var(--color-border)] p-3">
             <div className="flex items-start justify-between gap-2 mb-2.5">
@@ -83,8 +83,8 @@ export function InventoryTable({ components }: InventoryTableProps) {
         {sorted.length === 0 && <p className="text-center py-8 text-[var(--color-text-tertiary)] text-sm">No components match the filters.</p>}
       </div>
 
-      {/* Desktop table */}
-      <div className="hidden sm:block bg-[var(--color-bg)] rounded-[var(--radius-lg)] border border-[var(--color-border)] overflow-hidden">
+      {/* Tablet + desktop table */}
+      <div className="hidden md:block bg-[var(--color-bg)] rounded-[var(--radius-lg)] border border-[var(--color-border)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-[var(--color-bg-subtle)] border-b border-[var(--color-border)]">

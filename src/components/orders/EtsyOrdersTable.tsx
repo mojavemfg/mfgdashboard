@@ -17,8 +17,8 @@ export function EtsyOrdersTable({ items, activeBuyer, onBuyerClick }: EtsyOrders
 
   return (
     <>
-      {/* Mobile card view */}
-      <div className="sm:hidden flex flex-col gap-2">
+      {/* Mobile card view — phones only (< 768px) */}
+      <div className="md:hidden flex flex-col gap-2">
         {items.map((item) => (
           <div
             key={item.transactionId}
@@ -62,8 +62,8 @@ export function EtsyOrdersTable({ items, activeBuyer, onBuyerClick }: EtsyOrders
         )}
       </div>
 
-      {/* Desktop table */}
-      <div className="hidden sm:block border border-[var(--color-border)] rounded-[var(--radius-lg)] overflow-hidden">
+      {/* Tablet + desktop table */}
+      <div className="hidden md:block border border-[var(--color-border)] rounded-[var(--radius-lg)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-[var(--color-bg-subtle)]">

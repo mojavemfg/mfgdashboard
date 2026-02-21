@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { BottomNav } from '@/components/layout/BottomNav';
 import { Dashboard } from '@/pages/Dashboard';
 import { ToastProvider } from '@/components/ui/Toast';
 import { useInventoryMetrics } from '@/hooks/useInventoryMetrics';
@@ -9,6 +8,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useSalesOrders } from '@/hooks/useSalesOrders';
 import { usePrintInventory } from '@/hooks/usePrintInventory';
 import { useSettings } from '@/hooks/useSettings';
+import { useSidebar } from '@/hooks/useSidebar';
 
 export type View = 'dashboard' | 'inventory' | 'orders' | 'listings' | 'seo' | 'salesmap' | 'margin' | 'settings';
 
@@ -25,7 +25,7 @@ const viewTitles: Record<View, string> = {
 
 function App() {
   const [activeView, setActiveView] = useState<View>('dashboard');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const sidebar = useSidebar(activeView);
 
   const { criticalCount } = useInventoryMetrics();
   const { isDark, toggle } = useTheme();
@@ -49,14 +49,15 @@ function App() {
           isDark={isDark}
           onThemeToggle={toggle}
           pageTitle={viewTitles[activeView]}
-          onMobileMenuOpen={() => setMobileMenuOpen(true)}
+          onMobileMenuOpen={sidebar.open}
+          onNavigate={setActiveView}
         />
         <div className="flex flex-1 overflow-hidden">
           <Sidebar
             activeView={activeView}
             onViewChange={setActiveView}
-            mobileOpen={mobileMenuOpen}
-            onMobileClose={() => setMobileMenuOpen(false)}
+            mobileOpen={sidebar.isOpen}
+            onMobileClose={sidebar.close}
           />
           <Dashboard
             activeView={activeView}
@@ -74,7 +75,6 @@ function App() {
             updateSettings={updateSettings}
           />
         </div>
-        <BottomNav activeView={activeView} onViewChange={setActiveView} />
       </div>
     </ToastProvider>
   );

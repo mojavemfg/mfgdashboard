@@ -36,13 +36,40 @@ function NavButton({
   Icon,
   active,
   onClick,
+  mobile = false,
 }: {
   id: View;
   label: string;
   Icon: React.ComponentType<{ size?: number; className?: string }>;
   active: boolean;
   onClick: () => void;
+  mobile?: boolean;
 }) {
+  if (mobile) {
+    // Mobile: taller touch target (h-10), left-border active indicator
+    return (
+      <button
+        key={id}
+        onClick={onClick}
+        className={[
+          'flex items-center gap-3 w-full h-10 text-sm font-medium',
+          'transition-colors duration-150 cursor-pointer',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]',
+          active
+            ? 'border-l-[3px] border-[var(--color-brand)] text-[var(--color-text-primary)] px-[13px]'
+            : 'border-l-[3px] border-transparent text-[var(--color-text-secondary)] px-4 hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text-primary)]',
+        ].join(' ')}
+      >
+        <Icon
+          size={16}
+          className={active ? 'text-[var(--color-brand)]' : 'text-[var(--color-text-tertiary)]'}
+        />
+        {label}
+      </button>
+    );
+  }
+
+  // Desktop: compact 30px height with rounded background
   return (
     <button
       key={id}
@@ -66,7 +93,14 @@ function NavButton({
   );
 }
 
-function SectionLabel({ label }: { label: string }) {
+function SectionLabel({ label, mobile }: { label: string; mobile?: boolean }) {
+  if (mobile) {
+    return (
+      <div className="px-4 mt-4 mb-1 text-[10px] font-semibold uppercase tracking-widest text-[var(--color-text-tertiary)]">
+        {label}
+      </div>
+    );
+  }
   return (
     <div className="px-3 mt-4 mb-1 text-[10px] font-semibold uppercase tracking-widest text-[var(--color-text-tertiary)]">
       {label}
@@ -74,34 +108,39 @@ function SectionLabel({ label }: { label: string }) {
   );
 }
 
-function SidebarContent({
-  activeView,
-  onViewChange,
-}: {
-  activeView: View;
-  onViewChange: (view: View) => void;
-}) {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-
-  // Group items by section
+function buildSections(items: NavItem[]) {
   const sections: { label?: string; items: NavItem[] }[] = [];
-  let currentSection: { label?: string; items: NavItem[] } | null = null;
+  let current: { label?: string; items: NavItem[] } | null = null;
 
-  for (const item of navItems) {
-    if (item.section && (!currentSection || currentSection.label !== item.section)) {
-      currentSection = { label: item.section, items: [item] };
-      sections.push(currentSection);
-    } else if (currentSection && item.section === currentSection.label) {
-      currentSection.items.push(item);
+  for (const item of items) {
+    if (item.section && (!current || current.label !== item.section)) {
+      current = { label: item.section, items: [item] };
+      sections.push(current);
+    } else if (current && item.section === current.label) {
+      current.items.push(item);
     } else {
-      if (!currentSection || currentSection.label !== undefined) {
-        currentSection = { label: undefined, items: [item] };
-        sections.push(currentSection);
+      if (!current || current.label !== undefined) {
+        current = { label: undefined, items: [item] };
+        sections.push(current);
       } else {
-        currentSection.items.push(item);
+        current.items.push(item);
       }
     }
   }
+  return sections;
+}
+
+function SidebarContent({
+  activeView,
+  onViewChange,
+  mobile = false,
+}: {
+  activeView: View;
+  onViewChange: (view: View) => void;
+  mobile?: boolean;
+}) {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const sections = buildSections(navItems);
 
   return (
     <div className="flex flex-col h-full">
@@ -136,9 +175,7 @@ function SidebarContent({
               <Settings size={14} />
               Settings
             </button>
-            <button
-              className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text-primary)] transition-colors"
-            >
+            <button className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text-primary)] transition-colors">
               <LogOut size={14} />
               Sign Out
             </button>
@@ -147,16 +184,17 @@ function SidebarContent({
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-2 py-3 overflow-y-auto">
+      <nav className={`flex-1 py-3 overflow-y-auto ${mobile ? '' : 'px-2'}`}>
         {sections.map((section, i) => (
           <div key={i}>
-            {section.label && <SectionLabel label={section.label} />}
+            {section.label && <SectionLabel label={section.label} mobile={mobile} />}
             {section.items.map((item) => (
               <NavButton
                 key={item.id}
                 {...item}
                 active={activeView === item.id}
                 onClick={() => onViewChange(item.id)}
+                mobile={mobile}
               />
             ))}
           </div>
@@ -164,16 +202,16 @@ function SidebarContent({
       </nav>
 
       {/* Bottom: settings + user */}
-      <div className="px-2 pb-3 border-t border-[var(--color-border)] pt-3 space-y-1">
+      <div className={`border-t border-[var(--color-border)] pt-3 pb-3 space-y-1 ${mobile ? '' : 'px-2'}`}>
         <NavButton
           id="settings"
           label="Settings"
           Icon={Settings}
           active={activeView === 'settings'}
           onClick={() => onViewChange('settings')}
+          mobile={mobile}
         />
-        {/* User row */}
-        <div className="flex items-center gap-2 px-3 py-2 mt-1">
+        <div className={`flex items-center gap-2 py-2 mt-1 ${mobile ? 'px-4' : 'px-3'}`}>
           <div className="w-6 h-6 rounded-[var(--radius-full)] bg-[var(--color-bg-muted)] border border-[var(--color-border)] flex items-center justify-center shrink-0">
             <span className="text-[10px] font-semibold text-[var(--color-text-secondary)]">MO</span>
           </div>
@@ -190,24 +228,24 @@ function SidebarContent({
 export function Sidebar({ activeView, onViewChange, mobileOpen = false, onMobileClose }: SidebarProps) {
   return (
     <>
-      {/* Desktop sidebar */}
+      {/* Desktop sidebar — always visible at lg+ */}
       <aside className="hidden lg:flex w-[220px] shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-bg)]">
         <SidebarContent activeView={activeView} onViewChange={onViewChange} />
       </aside>
 
-      {/* Mobile drawer */}
+      {/* Mobile/tablet drawer — slides in from left */}
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-50 flex">
+        <div className="lg:hidden fixed inset-0 z-40">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/40 animate-fade-in"
             onClick={onMobileClose}
           />
-          {/* Panel */}
-          <aside className="relative w-[220px] bg-[var(--color-bg)] border-r border-[var(--color-border)] flex flex-col animate-slideover-in">
+          {/* Drawer panel */}
+          <aside className="absolute left-0 top-0 bottom-0 w-[260px] bg-[var(--color-bg)] border-r border-[var(--color-border)] flex flex-col z-50 shadow-[var(--shadow-md)] animate-sidebar-in">
             <button
               onClick={onMobileClose}
-              className="absolute top-3 right-3 p-1 rounded-[var(--radius-md)] text-[var(--color-text-tertiary)] hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text-primary)] transition-colors"
+              className="absolute top-3 right-3 p-1.5 rounded-[var(--radius-md)] text-[var(--color-text-tertiary)] hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text-primary)] transition-colors"
               aria-label="Close menu"
             >
               <X size={16} />
@@ -215,6 +253,7 @@ export function Sidebar({ activeView, onViewChange, mobileOpen = false, onMobile
             <SidebarContent
               activeView={activeView}
               onViewChange={(v) => { onViewChange(v); onMobileClose?.(); }}
+              mobile
             />
           </aside>
         </div>

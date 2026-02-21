@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
-import { X } from 'lucide-react';
+import { X, ArrowLeft } from 'lucide-react';
 
 interface SlideOverProps {
   open: boolean;
@@ -20,11 +20,8 @@ export function SlideOver({ open, onClose, title, children, footer }: SlideOverP
   }, [open, onClose]);
 
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    if (open) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = '';
     return () => { document.body.style.overflow = ''; };
   }, [open]);
 
@@ -38,10 +35,14 @@ export function SlideOver({ open, onClose, title, children, footer }: SlideOverP
         onClick={onClose}
       />
 
-      {/* Panel — full width mobile, 400px desktop */}
+      {/*
+        Mobile (< md): full-width panel — feels native
+        Tablet (768–1023px): 360px panel from right
+        Desktop (1024px+): 400px panel from right
+      */}
       <div
         className={[
-          'relative w-full sm:w-[400px]',
+          'relative w-full md:w-[360px] lg:w-[400px]',
           'bg-[var(--color-bg)] border-l border-[var(--color-border)]',
           'flex flex-col h-full',
           'animate-slideover-in',
@@ -49,8 +50,8 @@ export function SlideOver({ open, onClose, title, children, footer }: SlideOverP
       >
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border)] shrink-0">
-            <h2 className="text-base font-semibold text-[var(--color-text-primary)]">{title}</h2>
+          <div className="flex items-center gap-3 px-5 py-4 border-b border-[var(--color-border)] shrink-0">
+            {/* Mobile: back arrow; tablet+: X close button */}
             <button
               onClick={onClose}
               className={[
@@ -59,10 +60,12 @@ export function SlideOver({ open, onClose, title, children, footer }: SlideOverP
                 'transition-colors duration-150 focus-visible:outline-none',
                 'focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]',
               ].join(' ')}
-              aria-label="Close"
+              aria-label="Go back"
             >
-              <X size={16} />
+              <ArrowLeft size={16} className="md:hidden" />
+              <X size={16} className="hidden md:block" />
             </button>
+            <h2 className="text-base font-semibold text-[var(--color-text-primary)] flex-1">{title}</h2>
           </div>
         )}
 

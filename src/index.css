@@ -78,6 +78,62 @@ body {
   animation: progress-shrink 4s linear forwards;
 }
 
+/* ─── Sidebar slide-in from left ─────────────────────────────────────────── */
+
+@keyframes sidebar-in {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+.animate-sidebar-in {
+  animation: sidebar-in 250ms ease-out both;
+}
+
+/* ─── Bottom-sheet slide up (mobile modals) ───────────────────────────────── */
+
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.animate-sheet-up {
+  animation: sheet-up 250ms ease-out both;
+}
+
+/* ─── Responsive breakpoint utilities ────────────────────────────────────── */
+/* Breakpoints: Mobile < 768px | Tablet 768–1023px | Desktop 1024px+         */
+/* Use base / md: / lg: — avoid sm: for layout decisions                      */
+
+.mobile-only { display: block; }
+.tablet-up   { display: none; }
+.desktop-only { display: none; }
+
+@media (min-width: 768px) {
+  .mobile-only { display: none; }
+  .tablet-up   { display: block; }
+}
+
+@media (min-width: 1024px) {
+  .desktop-only { display: block; }
+}
+
+/* Touch-friendly tap target (minimum 44×44px) */
+.tap-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Horizontal scroll container (mobile kanban, tab overflow) */
+.scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.scroll-x::-webkit-scrollbar { display: none; }
+
 /* ─── Scrollbar ───────────────────────────────────────────────────────────── */
 
 ::-webkit-scrollbar {

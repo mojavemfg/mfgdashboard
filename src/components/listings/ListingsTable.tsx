@@ -93,8 +93,60 @@ export function ListingsTable({ listings, onRetryAI }: Props) {
         ))}
       </div>
 
-      {/* Table */}
-      <div className="bg-[var(--color-bg)] rounded-[var(--radius-lg)] border border-[var(--color-border)] overflow-hidden">
+      {/* Mobile card list — phones only (< 768px) */}
+      <div className="md:hidden flex flex-col gap-2">
+        {sorted.map((listing) => {
+          const isExpanded = expandedIdx === listing.index;
+          return (
+            <div
+              key={listing.index}
+              className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-lg)] overflow-hidden"
+            >
+              <button
+                onClick={() => setExpandedIdx(isExpanded ? null : listing.index)}
+                className="w-full p-4 text-left active:bg-[var(--color-bg-subtle)] transition-colors"
+              >
+                <div className="flex items-start gap-3">
+                  <ScoreBadge score={listing.overall} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-[var(--color-text-primary)] line-clamp-2 leading-snug">
+                      {listing.title}
+                    </p>
+                    <div className="flex items-center gap-3 mt-1.5 text-xs text-[var(--color-text-tertiary)]">
+                      <span>Tags <SubScoreChip score={listing.subScores.tags} /></span>
+                      <span>Title <SubScoreChip score={listing.subScores.title} /></span>
+                      <span>Imgs <SubScoreChip score={listing.subScores.images} /></span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <span className="text-sm font-medium text-[var(--color-text-secondary)]">${listing.price.toFixed(2)}</span>
+                    <ChevronRight
+                      size={14}
+                      className={`text-[var(--color-text-tertiary)] transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                    />
+                  </div>
+                </div>
+              </button>
+              {isExpanded && (
+                <div className="border-t border-[var(--color-border)]">
+                  <ListingRowExpanded
+                    listing={listing}
+                    onRetryAI={() => onRetryAI(listing.index)}
+                  />
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {sorted.length === 0 && (
+          <p className="text-center py-8 text-sm text-[var(--color-text-tertiary)]">
+            No listings match the current filter.
+          </p>
+        )}
+      </div>
+
+      {/* Tablet + desktop table */}
+      <div className="hidden md:block bg-[var(--color-bg)] rounded-[var(--radius-lg)] border border-[var(--color-border)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="border-b border-[var(--color-border)]">
