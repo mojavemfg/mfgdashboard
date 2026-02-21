@@ -1,9 +1,17 @@
 import { useState, useRef, useEffect } from 'react';
-import { Bell, Sun, Moon, Menu, Settings, LogOut } from 'lucide-react';
+import { Bell, Sun, Moon, Menu, Settings, LogOut, AlertOctagon, AlertTriangle, ShoppingBag, CheckCircle2 } from 'lucide-react';
 import type { View } from '@/App';
 
+export interface NotificationAlert {
+  id: string;
+  severity: 'critical' | 'warning' | 'info';
+  title: string;
+  detail: string;
+  view: View;
+}
+
 interface HeaderProps {
-  criticalCount: number;
+  alerts: NotificationAlert[];
   isDark: boolean;
   onThemeToggle: () => void;
   pageTitle?: string;
@@ -11,27 +19,18 @@ interface HeaderProps {
   onNavigate?: (view: View) => void;
 }
 
-export function Header({
-  criticalCount,
-  isDark,
-  onThemeToggle,
-  pageTitle = 'Dashboard',
-  onMobileMenuOpen,
-  onNavigate,
-}: HeaderProps) {
-  const [avatarOpen, setAvatarOpen] = useState(false);
-  const avatarRef = useRef<HTMLDivElement>(null);
+// Shared hook for click-outside + Escape dismiss
+function useDropdown() {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
-  // Close avatar dropdown on outside click or Escape
   useEffect(() => {
-    if (!avatarOpen) return;
+    if (!open) return;
     const onMouse = (e: MouseEvent) => {
-      if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) {
-        setAvatarOpen(false);
-      }
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { e.preventDefault(); setAvatarOpen(false); }
+      if (e.key === 'Escape') { e.preventDefault(); setOpen(false); }
     };
     document.addEventListener('mousedown', onMouse);
     document.addEventListener('keydown', onKey);
@@ -39,12 +38,46 @@ export function Header({
       document.removeEventListener('mousedown', onMouse);
       document.removeEventListener('keydown', onKey);
     };
-  }, [avatarOpen]);
+  }, [open]);
+
+  return { open, setOpen, ref };
+}
+
+const severityIcon = {
+  critical: <AlertOctagon size={13} className="text-[var(--color-danger)] shrink-0 mt-0.5" />,
+  warning:  <AlertTriangle size={13} className="text-[var(--color-warning)] shrink-0 mt-0.5" />,
+  info:     <ShoppingBag size={13} className="text-[var(--color-info)] shrink-0 mt-0.5" />,
+};
+
+
+export function Header({
+  alerts,
+  isDark,
+  onThemeToggle,
+  pageTitle = 'Dashboard',
+  onMobileMenuOpen,
+  onNavigate,
+}: HeaderProps) {
+  const bell   = useDropdown();
+  const avatar = useDropdown();
+
+  const criticalCount = alerts.filter(a => a.severity === 'critical').length;
+  const totalCount    = alerts.length;
+
+  // Group alerts by severity for the dropdown
+  const criticals = alerts.filter(a => a.severity === 'critical');
+  const warnings  = alerts.filter(a => a.severity === 'warning');
+  const infos     = alerts.filter(a => a.severity === 'info');
 
   const iconBtn = [
     'p-2 rounded-[var(--radius-md)] transition-colors duration-150',
     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]',
   ].join(' ');
+
+  function handleAlertClick(view: View) {
+    onNavigate?.(view);
+    bell.setOpen(false);
+  }
 
   return (
     <header
@@ -86,10 +119,13 @@ export function Header({
           {isDark ? <Sun size={16} /> : <Moon size={16} />}
         </button>
 
-        {/* Notification bell */}
-        <div className="relative">
+        {/* Notification bell + dropdown */}
+        <div ref={bell.ref} className="relative">
           <button
+            onClick={() => bell.setOpen(v => !v)}
             aria-label="Notifications"
+            aria-haspopup="true"
+            aria-expanded={bell.open}
             className={[
               iconBtn,
               criticalCount > 0
@@ -99,21 +135,87 @@ export function Header({
           >
             <Bell size={16} />
           </button>
-          {/* Future badge dot placeholder */}
-          {criticalCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 bg-[var(--color-danger)] text-white text-[9px] font-bold rounded-[var(--radius-full)] flex items-center justify-center">
-              {criticalCount}
+
+          {/* Badge */}
+          {totalCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 bg-[var(--color-danger)] text-white text-[9px] font-bold rounded-[var(--radius-full)] flex items-center justify-center pointer-events-none">
+              {totalCount}
             </span>
+          )}
+
+          {/* Notification dropdown panel */}
+          {bell.open && (
+            <div className="absolute right-0 top-full mt-1 w-80 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] z-50 overflow-hidden animate-modal-in">
+              {/* Header row */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)]">
+                <span className="text-sm font-semibold text-[var(--color-text-primary)]">Notifications</span>
+                {totalCount > 0 && (
+                  <span className="text-xs text-[var(--color-text-tertiary)]">{totalCount} active</span>
+                )}
+              </div>
+
+              {/* Alert list */}
+              <div className="max-h-[360px] overflow-y-auto">
+                {totalCount === 0 ? (
+                  <div className="flex items-center gap-2.5 px-4 py-5">
+                    <CheckCircle2 size={16} className="text-[var(--color-success)] shrink-0" />
+                    <span className="text-sm text-[var(--color-success)] font-medium">All clear — no active alerts</span>
+                  </div>
+                ) : (
+                  <>
+                    {/* Critical group */}
+                    {criticals.length > 0 && (
+                      <AlertGroup
+                        label="Critical"
+                        labelCls="text-[var(--color-danger)]"
+                        items={criticals}
+                        onNavigate={handleAlertClick}
+                      />
+                    )}
+                    {/* Warning group */}
+                    {warnings.length > 0 && (
+                      <AlertGroup
+                        label="Warning"
+                        labelCls="text-[var(--color-warning)]"
+                        items={warnings}
+                        onNavigate={handleAlertClick}
+                      />
+                    )}
+                    {/* Info group */}
+                    {infos.length > 0 && (
+                      <AlertGroup
+                        label="Orders"
+                        labelCls="text-[var(--color-info)]"
+                        items={infos}
+                        onNavigate={handleAlertClick}
+                      />
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Footer link */}
+              {totalCount > 0 && (
+                <div className="border-t border-[var(--color-border)]">
+                  <button
+                    onClick={() => handleAlertClick('inventory')}
+                    className="w-full px-4 py-2.5 text-xs font-medium text-[var(--color-brand)] hover:bg-[var(--color-bg-subtle)] transition-colors text-left"
+                  >
+                    View all in Inventory →
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
 
         {/* Avatar with dropdown */}
-        <div ref={avatarRef} className="relative ml-1">
+        <div ref={avatar.ref} className="relative ml-1">
           <button
-            onClick={() => setAvatarOpen(v => !v)}
+            onClick={() => avatar.setOpen(v => !v)}
             aria-label="User menu"
             aria-haspopup="menu"
-            aria-expanded={avatarOpen}
+            aria-expanded={avatar.open}
             className={[
               'w-7 h-7 rounded-[var(--radius-full)] bg-[var(--color-bg-muted)]',
               'border border-[var(--color-border)] flex items-center justify-center',
@@ -126,10 +228,10 @@ export function Header({
             MO
           </button>
 
-          {avatarOpen && (
+          {avatar.open && (
             <div className="absolute right-0 top-full mt-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] py-1 min-w-[160px] z-50">
               <button
-                onClick={() => { onNavigate?.('settings'); setAvatarOpen(false); }}
+                onClick={() => { onNavigate?.('settings'); avatar.setOpen(false); }}
                 className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text-primary)] transition-colors"
               >
                 <Settings size={14} />
@@ -144,5 +246,42 @@ export function Header({
         </div>
       </div>
     </header>
+  );
+}
+
+function AlertGroup({
+  label,
+  labelCls,
+  items,
+  onNavigate,
+}: {
+  label: string;
+  labelCls: string;
+  items: NotificationAlert[];
+  onNavigate: (view: View) => void;
+}) {
+  return (
+    <div>
+      <div className={`px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-widest ${labelCls}`}>
+        {label} · {items.length}
+      </div>
+      {items.map((alert) => (
+        <button
+          key={alert.id}
+          onClick={() => onNavigate(alert.view)}
+          className="w-full flex items-start gap-2.5 px-4 py-2.5 text-left hover:bg-[var(--color-bg-subtle)] transition-colors duration-100"
+        >
+          {severityIcon[alert.severity]}
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-[var(--color-text-primary)] truncate leading-snug">
+              {alert.title}
+            </p>
+            <p className="text-xs text-[var(--color-text-tertiary)] mt-0.5 truncate">
+              {alert.detail}
+            </p>
+          </div>
+        </button>
+      ))}
+    </div>
   );
 }
