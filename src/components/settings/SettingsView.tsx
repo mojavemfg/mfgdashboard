@@ -36,20 +36,33 @@ export function SettingsView({ settings, update, isDark, onThemeToggle }: Settin
   }
 
   return (
-    <div className="max-w-4xl mx-auto pb-24 md:pb-8">
-      <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6">Settings</h1>
+    <div className="max-w-4xl pb-24 lg:pb-8">
+      {/* Page header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-[var(--color-text-primary)]">Settings</h1>
+          <p className="text-sm text-[var(--color-text-secondary)] mt-0.5">
+            Manage your shop configuration and preferences
+          </p>
+        </div>
+      </div>
 
       <div className="flex gap-6">
-        {/* Left nav — hidden on mobile when a section is active */}
-        <div className={`shrink-0 w-52 ${activeSectionId ? 'hidden md:block' : 'block'}`}>
+        {/* Left nav */}
+        <div className={`shrink-0 ${activeSectionId ? 'hidden md:block' : 'block'}`}>
           <SettingsNav activeSectionId={activeSectionId} onSelect={setActiveSectionId} />
         </div>
 
-        {/* Right content — hidden on mobile when no section selected */}
-        <div className={`flex-1 min-w-0 ${!activeSectionId ? 'hidden md:block' : 'block'}`}>
+        {/* Content */}
+        <div className={`flex-1 min-w-0 max-w-xl ${!activeSectionId ? 'hidden md:block' : 'block'}`}>
+          {/* Mobile back button */}
           <button
             onClick={() => setActiveSectionId('')}
-            className="md:hidden flex items-center gap-1.5 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 mb-4 transition-colors border-none bg-transparent cursor-pointer"
+            className={[
+              'md:hidden flex items-center gap-1.5 text-sm font-medium mb-4',
+              'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]',
+              'transition-colors duration-150 focus-visible:outline-none',
+            ].join(' ')}
           >
             <ChevronLeft size={16} />
             Settings
@@ -57,7 +70,7 @@ export function SettingsView({ settings, update, isDark, onThemeToggle }: Settin
 
           {activeSection && (
             <div className="mb-4">
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+              <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">
                 {activeSection.label}
               </h2>
             </div>

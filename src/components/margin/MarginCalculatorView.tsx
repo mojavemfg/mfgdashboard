@@ -215,18 +215,18 @@ function ResultsPanel({
       : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400';
 
   const inputCls =
-    'w-full bg-white dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/60 text-slate-900 dark:text-slate-200 text-sm rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500/60 transition-colors tabular-nums';
+    'w-full bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm rounded-[var(--radius-md)] px-3.5 py-2.5 focus:outline-none focus:border-[var(--color-brand)] focus:shadow-[0_0_0_3px_var(--color-brand-subtle)] transition-colors tabular-nums';
   const labelCls =
-    'block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5';
+    'block text-xs font-semibold text-[var(--color-text-tertiary)] uppercase tracking-wider mb-1.5';
 
   return (
-    <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-none p-4 sm:p-5 mb-4">
-      <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Results</h3>
+    <div className="bg-[var(--color-bg)] rounded-[var(--radius-lg)] border border-[var(--color-border)] p-4 sm:p-5 mb-4">
+      <h3 className="text-sm font-semibold text-[var(--color-text-secondary)] mb-3">Results</h3>
 
       {/* Total cost */}
       <div className="flex items-center justify-between mb-4">
-        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Cost</span>
-        <span className="text-lg font-bold text-slate-800 dark:text-slate-200 font-mono tabular-nums">${baseCost.toFixed(2)}</span>
+        <span className="text-xs font-semibold text-[var(--color-text-tertiary)] uppercase tracking-wider">Total Cost</span>
+        <span className="text-lg font-bold text-[var(--color-text-primary)] font-mono tabular-nums">${baseCost.toFixed(2)}</span>
       </div>
 
       {/* Donut chart */}
@@ -287,20 +287,20 @@ function ResultsPanel({
 
       {/* Profit summary */}
       {activeSalePrice > 0 ? (
-        <div className="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-700/50">
+        <div className="flex items-center justify-between pt-3 border-t border-[var(--color-border)]">
           <span
             className={`text-sm font-bold font-mono tabular-nums ${
-              profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
+              profit >= 0 ? 'text-[var(--color-success)]' : 'text-[var(--color-danger)]'
             }`}
           >
             {profit >= 0 ? '+' : ''}${profit.toFixed(2)} profit
           </span>
-          <span className={`text-xs font-semibold px-2 py-1 rounded-lg ${marginBadgeCls}`}>
+          <span className={`text-xs font-semibold px-2 py-1 rounded-[var(--radius-md)] ${marginBadgeCls}`}>
             {activeMargin.toFixed(1)}% margin
           </span>
         </div>
       ) : (
-        <p className="text-xs text-center text-slate-400 dark:text-slate-500">
+        <p className="text-xs text-center text-[var(--color-text-tertiary)]">
           Enter a sale price or target margin to see results
         </p>
       )}
@@ -431,13 +431,13 @@ export function MarginCalculatorView({ settings }: { settings?: AppSettings }) {
   }, []);
 
   // Style helpers — baseInputCls omits w-full so flex children can use flex-1 properly
-  const baseInputCls = 'bg-white dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/60 text-slate-900 dark:text-slate-200 text-sm rounded-xl px-3.5 py-2.5 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-emerald-500 dark:focus:border-emerald-500/60 transition-colors';
+  const baseInputCls = 'bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm rounded-[var(--radius-md)] px-3.5 py-2.5 placeholder:text-[var(--color-text-tertiary)] focus:outline-none focus:border-[var(--color-brand)] focus:shadow-[0_0_0_3px_var(--color-brand-subtle)] transition-colors';
   const inputCls  = `w-full ${baseInputCls}`;
   const numCls    = `${inputCls} tabular-nums`;
-  const labelCls  = 'block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5';
-  const cardCls   = 'bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-none p-4 sm:p-5 mb-4';
+  const labelCls  = 'block text-xs font-semibold text-[var(--color-text-tertiary)] uppercase tracking-wider mb-1.5';
+  const cardCls   = 'bg-[var(--color-bg)] rounded-[var(--radius-lg)] border border-[var(--color-border)] p-4 sm:p-5 mb-4';
   const inlineCost = (val: number) => (
-    <span className="ml-auto text-xs text-emerald-600 dark:text-emerald-400 font-mono font-semibold tabular-nums">
+    <span className="ml-auto text-xs text-[var(--color-success)] font-mono font-semibold tabular-nums">
       ${val.toFixed(2)}
     </span>
   );
@@ -446,12 +446,12 @@ export function MarginCalculatorView({ settings }: { settings?: AppSettings }) {
     <div className="max-w-2xl mx-auto pb-24 sm:pb-8">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-xl flex items-center justify-center">
+        <div className="w-10 h-10 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-[var(--radius-lg)] flex items-center justify-center">
           <Calculator size={20} className="text-emerald-600 dark:text-emerald-400" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Margin Calculator</h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400">3D print Etsy listing cost & margin analyzer</p>
+          <h1 className="text-xl font-semibold tracking-tight text-[var(--color-text-primary)] mb-6">Margin Calculator</h1>
+          <p className="text-xs text-[var(--color-text-tertiary)]">3D print Etsy listing cost & margin analyzer</p>
         </div>
       </div>
 
@@ -482,13 +482,13 @@ export function MarginCalculatorView({ settings }: { settings?: AppSettings }) {
               />
               <button
                 onClick={savePreset}
-                className="p-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors shrink-0"
+                className="p-2 bg-emerald-600 text-white rounded-[var(--radius-lg)] hover:bg-emerald-700 transition-colors shrink-0"
               >
                 <Check size={15} />
               </button>
               <button
                 onClick={() => setShowSaveInput(false)}
-                className="p-2 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors shrink-0"
+                className="p-2 bg-[var(--color-bg-muted)] text-[var(--color-text-secondary)] rounded-[var(--radius-lg)] hover:bg-[var(--color-bg-subtle)] transition-colors shrink-0"
               >
                 <X size={15} />
               </button>
@@ -496,7 +496,7 @@ export function MarginCalculatorView({ settings }: { settings?: AppSettings }) {
           ) : (
             <button
               onClick={() => setShowSaveInput(true)}
-              className="px-3 py-2 text-xs font-semibold bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors shrink-0"
+              className="px-3 py-2 text-xs font-semibold bg-emerald-600 text-white rounded-[var(--radius-lg)] hover:bg-emerald-700 transition-colors shrink-0"
             >
               Save as…
             </button>
@@ -504,7 +504,7 @@ export function MarginCalculatorView({ settings }: { settings?: AppSettings }) {
 
           <button
             onClick={resetState}
-            className="px-3 py-2 text-xs font-semibold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors shrink-0"
+            className="px-3 py-2 text-xs font-semibold bg-[var(--color-bg-muted)] text-[var(--color-text-secondary)] rounded-[var(--radius-lg)] hover:bg-[var(--color-bg-subtle)] transition-colors shrink-0"
           >
             New
           </button>
@@ -513,11 +513,11 @@ export function MarginCalculatorView({ settings }: { settings?: AppSettings }) {
         {presets.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-3">
             {presets.map((p) => (
-              <div key={p.id} className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/60 rounded-lg px-2 py-1">
-                <span className="text-xs text-slate-700 dark:text-slate-300">{p.name}</span>
+              <div key={p.id} className="flex items-center gap-1 bg-[var(--color-bg-muted)] rounded-[var(--radius-md)] px-2 py-1">
+                <span className="text-xs text-[var(--color-text-secondary)]">{p.name}</span>
                 <button
                   onClick={() => deletePreset(p.id)}
-                  className="text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                  className="text-[var(--color-text-tertiary)] hover:text-[var(--color-danger)] transition-colors"
                 >
                   <X size={11} />
                 </button>
@@ -530,10 +530,10 @@ export function MarginCalculatorView({ settings }: { settings?: AppSettings }) {
       {/* Filament & Materials */}
       <div className={cardCls}>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Filament & Materials</h3>
+          <h3 className="text-sm font-semibold text-[var(--color-text-secondary)]">Filament & Materials</h3>
           <button
             onClick={() => setShowLibrary((v) => !v)}
-            className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+            className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-tertiary)] hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
           >
             <Pencil size={12} />
             Edit Library
@@ -541,7 +541,7 @@ export function MarginCalculatorView({ settings }: { settings?: AppSettings }) {
         </div>
 
         {showLibrary && (
-          <div className="mb-4 p-3 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200 dark:border-slate-700/50">
+          <div className="mb-4 p-3 bg-[var(--color-bg-subtle)] rounded-[var(--radius-lg)] border border-[var(--color-border)]">
             <div className="space-y-2">
               {filaments.map((f) => (
                 <div key={f.id} className="flex items-center gap-2">
@@ -563,7 +563,7 @@ export function MarginCalculatorView({ settings }: { settings?: AppSettings }) {
                   />
                   <button
                     onClick={() => removeFilament(f.id)}
-                    className="text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors shrink-0"
+                    className="text-[var(--color-text-tertiary)] hover:text-[var(--color-danger)] transition-colors shrink-0"
                   >
                     <Trash2 size={15} />
                   </button>
@@ -594,7 +594,7 @@ export function MarginCalculatorView({ settings }: { settings?: AppSettings }) {
           </div>
           <div>
             <div className="flex items-center mb-1.5">
-              <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Grams used</label>
+              <label className="text-xs font-semibold text-[var(--color-text-tertiary)] uppercase tracking-wider">Grams used</label>
               {inlineCost(filamentCost)}
             </div>
             <input
@@ -612,7 +612,7 @@ export function MarginCalculatorView({ settings }: { settings?: AppSettings }) {
 
       {/* Print Settings */}
       <div className={cardCls}>
-        <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Print Settings</h3>
+        <h3 className="text-sm font-semibold text-[var(--color-text-secondary)] mb-3">Print Settings</h3>
         <div className="grid grid-cols-3 gap-3">
           <div>
             <label className={labelCls}>Print time (hr)</label>
@@ -640,7 +640,7 @@ export function MarginCalculatorView({ settings }: { settings?: AppSettings }) {
           </div>
           <div>
             <div className="flex items-center mb-1.5">
-              <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Rate ($/kWh)</label>
+              <label className="text-xs font-semibold text-[var(--color-text-tertiary)] uppercase tracking-wider">Rate ($/kWh)</label>
               {inlineCost(electricityCost)}
             </div>
             <input
@@ -659,9 +659,9 @@ export function MarginCalculatorView({ settings }: { settings?: AppSettings }) {
       {/* Packaging */}
       <div className={cardCls}>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Packaging</h3>
+          <h3 className="text-sm font-semibold text-[var(--color-text-secondary)]">Packaging</h3>
           {packagingItems.length > 1 && (
-            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-mono font-semibold tabular-nums">
+            <span className="text-xs text-[var(--color-success)] font-mono font-semibold tabular-nums">
               Total: ${packagingCost.toFixed(2)}
             </span>
           )}
@@ -695,7 +695,7 @@ export function MarginCalculatorView({ settings }: { settings?: AppSettings }) {
               />
               <button
                 onClick={() => setPackagingItems((prev) => prev.filter((p) => p.id !== item.id))}
-                className="text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors shrink-0"
+                className="text-[var(--color-text-tertiary)] hover:text-[var(--color-danger)] transition-colors shrink-0"
               >
                 <X size={15} />
               </button>
@@ -713,9 +713,9 @@ export function MarginCalculatorView({ settings }: { settings?: AppSettings }) {
       {/* Hardware Add-ons */}
       <div className={cardCls}>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Hardware Add-ons</h3>
+          <h3 className="text-sm font-semibold text-[var(--color-text-secondary)]">Hardware Add-ons</h3>
           {hardwareItems.length > 0 && (
-            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-mono font-semibold tabular-nums">
+            <span className="text-xs text-[var(--color-success)] font-mono font-semibold tabular-nums">
               Total: ${hardwareCost.toFixed(2)}
             </span>
           )}
@@ -749,7 +749,7 @@ export function MarginCalculatorView({ settings }: { settings?: AppSettings }) {
               />
               <button
                 onClick={() => setHardwareItems((prev) => prev.filter((h) => h.id !== item.id))}
-                className="text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors shrink-0"
+                className="text-[var(--color-text-tertiary)] hover:text-[var(--color-danger)] transition-colors shrink-0"
               >
                 <X size={15} />
               </button>
@@ -767,22 +767,22 @@ export function MarginCalculatorView({ settings }: { settings?: AppSettings }) {
       {/* Etsy Fees */}
       <div className={cardCls}>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Etsy Fees</h3>
+          <h3 className="text-sm font-semibold text-[var(--color-text-secondary)]">Etsy Fees</h3>
           <button
             onClick={() => setEtsyEnabled((v) => !v)}
-            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${
-              etsyEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'
+            className={`relative inline-flex h-5 w-9 items-center rounded-[var(--radius-full)] transition-colors focus:outline-none ${
+              etsyEnabled ? 'bg-emerald-500' : 'bg-[var(--color-bg-muted)]'
             }`}
             aria-label="Toggle Etsy fees"
           >
             <span
-              className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${
+              className={`inline-block h-4 w-4 rounded-[var(--radius-full)] bg-white shadow transition-transform ${
                 etsyEnabled ? 'translate-x-4' : 'translate-x-0.5'
               }`}
             />
           </button>
         </div>
-        <div className={`space-y-2 text-xs text-slate-500 dark:text-slate-400 transition-opacity ${!etsyEnabled ? 'opacity-40' : ''}`}>
+        <div className={`space-y-2 text-xs text-[var(--color-text-tertiary)] transition-opacity ${!etsyEnabled ? 'opacity-40' : ''}`}>
           <div className="flex items-center justify-between">
             <span>Listing fee (per sale)</span>
             <span className="font-mono tabular-nums">${liveFees.listingFee.toFixed(2)}</span>
@@ -795,7 +795,7 @@ export function MarginCalculatorView({ settings }: { settings?: AppSettings }) {
             <span>Payment processing</span>
             <span className="font-mono tabular-nums">{(liveFees.processingRate * 100)}% + ${liveFees.processingFixed.toFixed(2)}</span>
           </div>
-          <p className="text-slate-400 dark:text-slate-500 pt-1">
+          <p className="text-[var(--color-text-tertiary)] pt-1">
             {etsyEnabled
               ? 'Fees apply to sale price and are included in margin calculations.'
               : 'Etsy fees disabled — calculations reflect direct costs only.'}

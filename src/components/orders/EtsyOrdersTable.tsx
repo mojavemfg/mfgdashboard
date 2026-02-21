@@ -1,4 +1,5 @@
 import type { EtsyOrderItem } from '@/types';
+import { Badge } from '@/components/ui/Badge';
 
 interface EtsyOrdersTableProps {
   items: EtsyOrderItem[];
@@ -7,7 +8,6 @@ interface EtsyOrdersTableProps {
 }
 
 export function EtsyOrdersTable({ items, activeBuyer, onBuyerClick }: EtsyOrdersTableProps) {
-  // Derive order grouping before rendering — keeps render pure
   const seen = new Set<string>();
   const grouped = items.map((item) => {
     const isFirstOfOrder = !seen.has(item.orderId);
@@ -22,101 +22,107 @@ export function EtsyOrdersTable({ items, activeBuyer, onBuyerClick }: EtsyOrders
         {items.map((item) => (
           <div
             key={item.transactionId}
-            className="bg-white dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/50 p-3 shadow-sm dark:shadow-none"
+            className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-3"
           >
             <div className="flex items-start justify-between gap-2 mb-2">
               <div className="min-w-0">
-                <p className="text-slate-900 dark:text-slate-200 text-sm font-semibold leading-tight">{item.itemName}</p>
+                <p className="text-sm font-medium text-[var(--color-text-primary)] leading-tight">{item.itemName}</p>
                 <button
                   onClick={() => onBuyerClick(item.shipName)}
-                  className={`text-[10px] mt-0.5 hover:underline cursor-pointer bg-transparent border-none p-0 text-left ${
-                    activeBuyer === item.shipName ? 'text-blue-600 dark:text-blue-400 font-semibold' : 'text-slate-400'
-                  }`}
+                  className={[
+                    'text-xs mt-0.5 hover:underline cursor-pointer bg-transparent border-none p-0 text-left transition-colors',
+                    activeBuyer === item.shipName
+                      ? 'text-[var(--color-brand)] font-medium'
+                      : 'text-[var(--color-text-tertiary)]',
+                  ].join(' ')}
                 >
                   {item.shipName}
                 </button>
               </div>
-              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-md shrink-0 ${
-                item.dateShipped
-                  ? 'bg-green-50 text-green-700 border border-green-200 dark:bg-green-500/15 dark:text-green-400 dark:border-green-600/40'
-                  : 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-600/40'
-              }`}>
+              <Badge variant={item.dateShipped ? 'success' : 'info'}>
                 {item.dateShipped ? 'Shipped' : 'Pending'}
-              </span>
+              </Badge>
             </div>
             <div className="grid grid-cols-3 gap-2 text-center">
               {[
-                { label: 'Qty', value: item.quantity },
+                { label: 'Qty',   value: item.quantity },
                 { label: 'Total', value: `$${item.itemTotal.toFixed(2)}` },
-                { label: 'City', value: item.shipCity || '—' },
+                { label: 'City',  value: item.shipCity || '—' },
               ].map(({ label, value }) => (
-                <div key={label} className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-2">
-                  <p className="text-slate-400 text-[9px] uppercase tracking-wider">{label}</p>
-                  <p className="text-slate-800 dark:text-slate-200 text-[10px] font-semibold mt-0.5">{value}</p>
+                <div key={label} className="bg-[var(--color-bg-subtle)] rounded-[var(--radius-md)] p-2">
+                  <p className="text-[9px] uppercase tracking-wide text-[var(--color-text-tertiary)]">{label}</p>
+                  <p className="text-xs font-medium mt-0.5 text-[var(--color-text-primary)]">{value}</p>
                 </div>
               ))}
             </div>
           </div>
         ))}
         {items.length === 0 && (
-          <p className="text-center py-8 text-slate-400 text-sm">No items match the filters.</p>
+          <p className="text-center py-8 text-sm text-[var(--color-text-tertiary)]">No items match the filters.</p>
         )}
       </div>
 
       {/* Desktop table */}
-      <div className="hidden sm:block bg-white dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/50 overflow-hidden shadow-sm dark:shadow-none">
+      <div className="hidden sm:block border border-[var(--color-border)] rounded-[var(--radius-lg)] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700/60">
+          <table className="w-full">
+            <thead className="bg-[var(--color-bg-subtle)]">
               <tr>
                 {['Order ID', 'Item', 'Buyer', 'Qty', 'Total', 'Shipped', 'Country'].map((h) => (
-                  <th key={h} className="px-3 py-2.5 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">
+                  <th
+                    key={h}
+                    className="h-9 px-4 text-left text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wide border-b border-[var(--color-border)] whitespace-nowrap"
+                  >
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody>
-              {grouped.map((item) => {
-                return (
-                  <tr
-                    key={item.transactionId}
-                    className="border-b border-slate-100 dark:border-slate-700/30 hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors"
-                  >
-                    <td className="px-3 py-3 text-slate-400 text-xs font-mono">
-                      {item.isFirstOfOrder ? item.orderId : <span className="text-slate-200 dark:text-slate-700">↳</span>}
-                    </td>
-                    <td className="px-3 py-3 text-slate-800 dark:text-slate-200 text-xs max-w-xs truncate">{item.itemName}</td>
-                    <td className="px-3 py-3 text-xs">
-                      <button
-                        onClick={() => onBuyerClick(item.shipName)}
-                        className={`hover:underline cursor-pointer bg-transparent border-none p-0 text-left ${
-                          activeBuyer === item.shipName
-                            ? 'text-blue-600 dark:text-blue-400 font-semibold'
-                            : 'text-slate-500 dark:text-slate-400'
-                        }`}
-                      >
-                        {item.shipName}
-                      </button>
-                    </td>
-                    <td className="px-3 py-3 text-slate-600 dark:text-slate-300 font-mono text-xs">{item.quantity}</td>
-                    <td className="px-3 py-3 text-slate-700 dark:text-slate-300 font-mono text-xs font-semibold">
-                      ${item.itemTotal.toFixed(2)}
-                    </td>
-                    <td className="px-3 py-3 text-xs">
-                      {item.dateShipped ? (
-                        <span className="text-green-600 dark:text-green-400 font-mono">{item.dateShipped}</span>
-                      ) : (
-                        <span className="text-blue-500 dark:text-blue-400">Pending</span>
-                      )}
-                    </td>
-                    <td className="px-3 py-3 text-slate-500 dark:text-slate-400 text-xs">{item.shipCountry}</td>
-                  </tr>
-                );
-              })}
+            <tbody className="bg-[var(--color-bg)]">
+              {grouped.map((item) => (
+                <tr
+                  key={item.transactionId}
+                  className="group border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-bg-subtle)] transition-colors duration-100"
+                >
+                  <td className="h-11 px-4 text-xs font-mono text-[var(--color-text-tertiary)]">
+                    {item.isFirstOfOrder
+                      ? item.orderId
+                      : <span className="opacity-30">↳</span>
+                    }
+                  </td>
+                  <td className="h-11 px-4 text-sm text-[var(--color-text-primary)] max-w-xs truncate">
+                    {item.itemName}
+                  </td>
+                  <td className="h-11 px-4 text-sm">
+                    <button
+                      onClick={() => onBuyerClick(item.shipName)}
+                      className={[
+                        'hover:underline cursor-pointer bg-transparent border-none p-0 text-left transition-colors',
+                        activeBuyer === item.shipName
+                          ? 'text-[var(--color-brand)] font-medium'
+                          : 'text-[var(--color-text-secondary)]',
+                      ].join(' ')}
+                    >
+                      {item.shipName}
+                    </button>
+                  </td>
+                  <td className="h-11 px-4 text-sm font-mono text-[var(--color-text-secondary)]">{item.quantity}</td>
+                  <td className="h-11 px-4 text-sm font-mono font-semibold text-[var(--color-text-primary)]">
+                    ${item.itemTotal.toFixed(2)}
+                  </td>
+                  <td className="h-11 px-4 text-sm">
+                    {item.dateShipped ? (
+                      <span className="font-mono text-xs text-[var(--color-success)]">{item.dateShipped}</span>
+                    ) : (
+                      <Badge variant="info">Pending</Badge>
+                    )}
+                  </td>
+                  <td className="h-11 px-4 text-sm text-[var(--color-text-secondary)]">{item.shipCountry}</td>
+                </tr>
+              ))}
               {items.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="text-center py-10 text-slate-400 text-sm">
+                  <td colSpan={7} className="py-16 text-center text-sm text-[var(--color-text-tertiary)]">
                     No items match the filters.
                   </td>
                 </tr>

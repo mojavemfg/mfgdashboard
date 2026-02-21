@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Pencil } from 'lucide-react';
 import type { PrintItemWithStatus, PrintCategory } from '@/types/printInventory';
 import { StatusBadge } from './StatusBadge';
+import { Input } from '@/components/ui/Input';
 import type { ReorderStatus } from '@/types';
 
 type CategoryFilter = PrintCategory | 'All';
@@ -12,8 +13,6 @@ interface Props {
 }
 
 const CATEGORY_FILTERS: CategoryFilter[] = ['All', 'Filament', 'Insert', 'Spare Part'];
-
-const inputCls = 'bg-white dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/60 text-slate-900 dark:text-slate-200 text-sm rounded-xl focus:outline-none focus:border-blue-500 dark:focus:border-blue-500/60 transition-colors';
 
 export function PrintInventoryTable({ items, onEdit }: Props) {
   const [search, setSearch] = useState('');
@@ -33,42 +32,44 @@ export function PrintInventoryTable({ items, onEdit }: Props) {
 
   return (
     <div>
-      {/* Category filter tabs */}
-      <div className="flex items-center gap-1 mb-3 flex-wrap">
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-2 mb-3">
         {CATEGORY_FILTERS.map((cat) => (
           <button
             key={cat}
             onClick={() => setCategoryFilter(cat)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+            className={[
+              'h-7 px-3 text-xs font-medium rounded-[var(--radius-md)] transition-colors duration-150',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]',
               categoryFilter === cat
-                ? 'bg-blue-600 text-white'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-            }`}
+                ? 'bg-[var(--color-brand)] text-white'
+                : 'bg-[var(--color-bg-muted)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]',
+            ].join(' ')}
           >
             {cat}
           </button>
         ))}
-      </div>
-
-      {/* Search */}
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Search by name, material, color…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className={`w-full px-3 py-2.5 placeholder:text-slate-400 dark:placeholder:text-slate-500 ${inputCls}`}
-        />
+        <div className="flex-1 min-w-[200px]">
+          <Input
+            type="text"
+            placeholder="Search by name, material, color…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
       </div>
 
       {/* Mobile card view */}
       <div className="sm:hidden flex flex-col gap-2">
         {filtered.map((item) => (
-          <div key={item.id} className="bg-white dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/50 p-3 shadow-sm">
-            <div className="flex items-start justify-between gap-2 mb-2.5">
+          <div
+            key={item.id}
+            className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-3"
+          >
+            <div className="flex items-start justify-between gap-2 mb-2">
               <div className="min-w-0">
-                <p className="text-slate-900 dark:text-slate-200 text-sm font-semibold leading-tight truncate">{item.name}</p>
-                <p className="text-slate-400 text-[10px] mt-0.5">
+                <p className="text-sm font-medium text-[var(--color-text-primary)] leading-tight truncate">{item.name}</p>
+                <p className="text-xs text-[var(--color-text-tertiary)] mt-0.5">
                   {item.category}
                   {item.material && ` · ${item.material}`}
                   {item.color && ` · ${item.color}`}
@@ -77,65 +78,80 @@ export function PrintInventoryTable({ items, onEdit }: Props) {
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <StatusBadge status={item.status as ReorderStatus} />
-                <button onClick={() => onEdit(item)} className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                <button
+                  onClick={() => onEdit(item)}
+                  className="p-1 rounded-[var(--radius-md)] text-[var(--color-text-tertiary)] hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text-primary)] transition-colors"
+                >
                   <Pencil size={13} />
                 </button>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-2 text-center">
               {[
-                { label: 'Stock', value: `${item.currentStock} ${item.unit}` },
-                { label: 'Safety', value: `${item.safetyStock} ${item.unit}` },
-                { label: 'Lead Time', value: `${item.leadTimeDays}d` },
+                { label: 'Stock',     value: `${item.currentStock} ${item.unit}` },
+                { label: 'Safety',    value: `${item.safetyStock} ${item.unit}` },
+                { label: 'Lead',      value: `${item.leadTimeDays}d` },
               ].map(({ label, value }) => (
-                <div key={label} className="bg-slate-50 dark:bg-slate-900/50 rounded-lg p-2">
-                  <p className="text-slate-400 text-[9px] uppercase tracking-wider">{label}</p>
-                  <p className="text-xs font-semibold mt-0.5 text-slate-800 dark:text-slate-200">{value}</p>
+                <div key={label} className="bg-[var(--color-bg-subtle)] rounded-[var(--radius-md)] p-2">
+                  <p className="text-[9px] uppercase tracking-wide text-[var(--color-text-tertiary)]">{label}</p>
+                  <p className="text-xs font-medium mt-0.5 text-[var(--color-text-primary)]">{value}</p>
                 </div>
               ))}
             </div>
           </div>
         ))}
-        {filtered.length === 0 && <p className="text-center py-8 text-slate-400 text-sm">No items match the filter.</p>}
+        {filtered.length === 0 && (
+          <p className="text-center py-8 text-sm text-[var(--color-text-tertiary)]">No items match the filter.</p>
+        )}
       </div>
 
       {/* Desktop table */}
-      <div className="hidden sm:block bg-white dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/50 overflow-hidden shadow-sm">
+      <div className="hidden sm:block border border-[var(--color-border)] rounded-[var(--radius-lg)] overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700/60">
+          <table className="w-full">
+            <thead className="bg-[var(--color-bg-subtle)]">
               <tr>
-                {['Name', 'Category', 'Details', 'Stock', 'Safety Stock', 'Lead Time', 'Value', 'Status', ''].map((h, i) => (
-                  <th key={i} className="px-3 py-2.5 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">{h}</th>
+                {['Name', 'Category', 'Details', 'Stock', 'Safety', 'Lead', 'Value', 'Status', ''].map((h, i) => (
+                  <th
+                    key={i}
+                    className="h-9 px-4 text-left text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wide border-b border-[var(--color-border)] whitespace-nowrap"
+                  >
+                    {h}
+                  </th>
                 ))}
               </tr>
             </thead>
-            <tbody>
+            <tbody className="bg-[var(--color-bg)]">
               {filtered.map((item) => (
-                <tr key={item.id} className="border-b border-slate-100 dark:border-slate-700/30 hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors">
-                  <td className="px-3 py-3">
-                    <div className="text-slate-800 dark:text-slate-200 text-xs font-medium">{item.name}</div>
-                    {item.supplier && <div className="text-slate-400 text-[10px]">{item.supplier}</div>}
+                <tr
+                  key={item.id}
+                  className="group border-b border-[var(--color-border)] last:border-0 hover:bg-[var(--color-bg-subtle)] transition-colors duration-100"
+                >
+                  <td className="h-11 px-4">
+                    <div className="text-sm font-medium text-[var(--color-text-primary)]">{item.name}</div>
+                    {item.supplier && <div className="text-xs text-[var(--color-text-tertiary)]">{item.supplier}</div>}
                   </td>
-                  <td className="px-3 py-3 text-slate-500 dark:text-slate-400 text-xs">{item.category}</td>
-                  <td className="px-3 py-3 text-slate-500 dark:text-slate-400 text-xs">
+                  <td className="h-11 px-4 text-sm text-[var(--color-text-secondary)]">{item.category}</td>
+                  <td className="h-11 px-4 text-sm text-[var(--color-text-secondary)]">
                     {item.category === 'Filament' && `${item.material ?? '—'} · ${item.color ?? '—'}`}
-                    {item.category === 'Insert' && `${item.insertSize ?? '—'} · ${item.insertType ?? '—'}`}
+                    {item.category === 'Insert'   && `${item.insertSize ?? '—'} · ${item.insertType ?? '—'}`}
                     {item.category === 'Spare Part' && '—'}
                   </td>
-                  <td className="px-3 py-3 text-slate-700 dark:text-slate-300 font-mono text-xs">{item.currentStock} {item.unit}</td>
-                  <td className="px-3 py-3 text-slate-500 dark:text-slate-400 font-mono text-xs">{item.safetyStock} {item.unit}</td>
-                  <td className="px-3 py-3 text-slate-500 dark:text-slate-400 font-mono text-xs">{item.leadTimeDays}d</td>
-                  <td className="px-3 py-3 text-slate-500 dark:text-slate-400 font-mono text-xs">
+                  <td className="h-11 px-4 text-sm font-mono text-[var(--color-text-primary)]">{item.currentStock} {item.unit}</td>
+                  <td className="h-11 px-4 text-sm font-mono text-[var(--color-text-secondary)]">{item.safetyStock} {item.unit}</td>
+                  <td className="h-11 px-4 text-sm font-mono text-[var(--color-text-secondary)]">{item.leadTimeDays}d</td>
+                  <td className="h-11 px-4 text-sm font-mono text-[var(--color-text-secondary)]">
                     {item.unitCost !== undefined
                       ? `$${item.totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                       : '—'}
                   </td>
-                  <td className="px-3 py-3"><StatusBadge status={item.status as ReorderStatus} /></td>
-                  <td className="px-3 py-3">
+                  <td className="h-11 px-4">
+                    <StatusBadge status={item.status as ReorderStatus} />
+                  </td>
+                  <td className="h-11 px-4">
                     <button
                       onClick={() => onEdit(item)}
-                      className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                      className="opacity-0 group-hover:opacity-100 p-1.5 rounded-[var(--radius-md)] text-[var(--color-text-tertiary)] hover:bg-[var(--color-bg-muted)] hover:text-[var(--color-text-primary)] transition-all duration-150"
                     >
                       <Pencil size={13} />
                     </button>
@@ -143,13 +159,19 @@ export function PrintInventoryTable({ items, onEdit }: Props) {
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={9} className="text-center py-10 text-slate-400 text-sm">No items match the filter.</td></tr>
+                <tr>
+                  <td colSpan={9} className="py-16 text-center text-sm text-[var(--color-text-tertiary)]">
+                    No items match the filter.
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>
         </div>
       </div>
-      <p className="text-slate-400 text-xs mt-2">Showing {filtered.length} of {items.length} items</p>
+      <p className="text-xs text-[var(--color-text-tertiary)] mt-2">
+        Showing {filtered.length} of {items.length} items
+      </p>
     </div>
   );
 }

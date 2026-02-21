@@ -79,11 +79,11 @@ export function UsMap({ stats, isDark }: UsMapProps) {
       </ComposableMap>
       {tooltip && (
         <div
-          className="fixed z-50 pointer-events-none bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 shadow-lg text-sm"
+          className="fixed z-50 pointer-events-none bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-lg)] px-3 py-2 shadow-[var(--shadow-md)] text-sm"
           style={{ left: tooltip.x + 12, top: tooltip.y - 40 }}
         >
-          <p className="font-semibold text-slate-900 dark:text-white">{tooltip.name}</p>
-          <p className="text-slate-500 dark:text-slate-400">
+          <p className="font-semibold text-[var(--color-text-primary)]">{tooltip.name}</p>
+          <p className="text-[var(--color-text-secondary)]">
             {tooltip.count} {tooltip.count === 1 ? 'order' : 'orders'} · ${tooltip.revenue.toFixed(2)}
           </p>
         </div>

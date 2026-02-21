@@ -7,12 +7,12 @@ export interface SettingsSection {
 }
 
 export const SETTINGS_SECTIONS: SettingsSection[] = [
-  { id: 'shop-profile',       label: 'Shop Profile',       Icon: Store },
-  { id: 'printing',           label: 'Printing Defaults',  Icon: Printer },
-  { id: 'etsy-fees',          label: 'Etsy Fees',          Icon: BadgeDollarSign },
-  { id: 'inventory-alerts',   label: 'Inventory Alerts',   Icon: Bell },
-  { id: 'appearance',         label: 'Appearance',         Icon: Palette },
-  { id: 'data-management',    label: 'Data Management',    Icon: Database },
+  { id: 'shop-profile',     label: 'Shop Profile',      Icon: Store },
+  { id: 'printing',         label: 'Printing Defaults', Icon: Printer },
+  { id: 'etsy-fees',        label: 'Etsy Fees',         Icon: BadgeDollarSign },
+  { id: 'inventory-alerts', label: 'Inventory Alerts',  Icon: Bell },
+  { id: 'appearance',       label: 'Appearance',        Icon: Palette },
+  { id: 'data-management',  label: 'Data Management',   Icon: Database },
 ];
 
 interface SettingsNavProps {
@@ -22,20 +22,26 @@ interface SettingsNavProps {
 
 export function SettingsNav({ activeSectionId, onSelect }: SettingsNavProps) {
   return (
-    <nav className="flex flex-col gap-0.5">
+    <nav className="flex flex-col gap-0.5 w-[180px]">
       {SETTINGS_SECTIONS.map(({ id, label, Icon }) => {
         const active = activeSectionId === id;
         return (
           <button
             key={id}
             onClick={() => onSelect(id)}
-            className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-all text-left w-full cursor-pointer border-none rounded-xl ${
+            className={[
+              'flex items-center gap-2.5 w-full px-3 h-[30px] text-sm font-medium text-left',
+              'rounded-[var(--radius-md)] transition-colors duration-150 cursor-pointer',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]',
               active
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20'
-                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
-            }`}
+                ? 'bg-[var(--color-bg-muted)] text-[var(--color-text-primary)]'
+                : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text-primary)]',
+            ].join(' ')}
           >
-            <Icon size={17} className={active ? 'text-blue-100' : ''} />
+            <Icon
+              size={15}
+              className={active ? 'text-[var(--color-text-primary)]' : 'text-[var(--color-text-tertiary)]'}
+            />
             {label}
           </button>
         );

@@ -1,44 +1,50 @@
 import { Sun, Moon } from 'lucide-react';
+import { Card } from '@/components/ui/Card';
 
 interface Props {
   isDark: boolean;
   onThemeToggle: () => void;
 }
 
-const cardCls = 'bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-none p-5';
-
 export function AppearanceSection({ isDark, onThemeToggle }: Props) {
   return (
-    <div className={cardCls}>
+    <Card>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {isDark
-            ? <Moon size={18} className="text-slate-400" />
-            : <Sun size={18} className="text-amber-500" />
+            ? <Moon size={16} className="text-[var(--color-text-tertiary)]" />
+            : <Sun size={16} className="text-[var(--color-warning)]" />
           }
           <div>
-            <p className="text-sm font-medium text-slate-800 dark:text-slate-200">
+            <p className="text-sm font-medium text-[var(--color-text-primary)]">
               {isDark ? 'Dark Mode' : 'Light Mode'}
             </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-[var(--color-text-tertiary)]">
               {isDark ? 'Easy on the eyes at night' : 'Better for bright environments'}
             </p>
           </div>
         </div>
+
+        {/* Toggle switch */}
         <button
           onClick={onThemeToggle}
           aria-label="Toggle theme"
-          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-            isDark ? 'bg-blue-600' : 'bg-slate-300'
-          }`}
+          className={[
+            'relative inline-flex h-6 w-11 items-center rounded-[var(--radius-full)]',
+            'transition-colors duration-200 focus-visible:outline-none',
+            'focus-visible:ring-2 focus-visible:ring-[var(--color-brand)] focus-visible:ring-offset-2',
+            isDark ? 'bg-[var(--color-brand)]' : 'bg-[var(--color-border-strong)]',
+          ].join(' ')}
         >
           <span
-            className={`inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${
-              isDark ? 'translate-x-5' : 'translate-x-0.5'
-            }`}
+            className={[
+              'inline-block h-5 w-5 rounded-[var(--radius-full)] bg-white shadow-[var(--shadow-xs)]',
+              'transition-transform duration-200',
+              isDark ? 'translate-x-5' : 'translate-x-0.5',
+            ].join(' ')}
           />
         </button>
       </div>
-    </div>
+    </Card>
   );
 }

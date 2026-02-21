@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
-import { X, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import type { PrintItem, PrintCategory } from '@/types/printInventory';
+import { Modal } from '@/components/ui/Modal';
+import { Button } from '@/components/ui/Button';
+import { Field, Input, Select } from '@/components/ui/Input';
 
 interface Props {
   initial?: PrintItem | null;
@@ -10,12 +13,9 @@ interface Props {
 }
 
 const CATEGORIES: PrintCategory[] = ['Filament', 'Insert', 'Spare Part'];
-const MATERIALS = ['PLA', 'PETG', 'ABS', 'TPU', 'ASA', 'Other'];
+const MATERIALS   = ['PLA', 'PETG', 'ABS', 'TPU', 'ASA', 'Other'];
 const INSERT_SIZES = ['M2', 'M3', 'M4', 'M5', 'Other'];
 const INSERT_TYPES = ['Heat-Set', 'Knurled', 'Threaded', 'Other'];
-
-const inputCls = 'w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-slate-200 text-sm rounded-lg focus:outline-none focus:border-blue-500 transition-colors';
-const labelCls = 'block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1';
 
 const blankForm = (): Omit<PrintItem, 'id'> => ({
   name: '',
@@ -54,14 +54,14 @@ export function PrintItemForm({ initial, onSave, onDelete, onClose }: Props) {
       Insert: 'pcs',
       'Spare Part': 'pcs',
     };
-    setForm(prev => ({
+    setForm((prev) => ({
       ...prev,
       category: cat,
       unit: unitDefaults[cat],
-      material: cat === 'Filament' ? (prev.material ?? 'PLA') : undefined,
-      color: cat === 'Filament' ? prev.color : undefined,
-      insertSize: cat === 'Insert' ? (prev.insertSize ?? 'M3') : undefined,
-      insertType: cat === 'Insert' ? (prev.insertType ?? 'Heat-Set') : undefined,
+      material:    cat === 'Filament' ? (prev.material ?? 'PLA') : undefined,
+      color:       cat === 'Filament' ? prev.color : undefined,
+      insertSize:  cat === 'Insert'   ? (prev.insertSize ?? 'M3') : undefined,
+      insertType:  cat === 'Insert'   ? (prev.insertType ?? 'Heat-Set') : undefined,
     }));
   }
 
@@ -74,155 +74,186 @@ export function PrintItemForm({ initial, onSave, onDelete, onClose }: Props) {
       unitCost: form.unitCost !== undefined && form.unitCost > 0 ? form.unitCost : undefined,
     };
     onSave(item);
-    handleClose();
+    onClose();
   }
 
   const isEdit = !!initial;
 
-  function handleClose() {
-    setConfirmDelete(false);
-    onClose();
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={handleClose}>
-      <div
-        className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700/60 overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700/60">
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-white">{isEdit ? 'Edit Item' : 'Add Item'}</h2>
-          <button onClick={handleClose} className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-colors">
-            <X size={16} />
-          </button>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[70vh] px-5 py-4 flex flex-col gap-4">
-          {/* Name */}
-          <div>
-            <label className={labelCls}>Name *</label>
-            <input required value={form.name} onChange={(e) => set('name', e.target.value)} className={inputCls} placeholder="e.g. Black PLA, M3 Insert, 0.4mm Nozzle" />
-          </div>
-
-          {/* Category */}
-          <div>
-            <label className={labelCls}>Category *</label>
-            <select value={form.category} onChange={(e) => handleCategoryChange(e.target.value as PrintCategory)} className={inputCls}>
-              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
-
-          {/* Category-specific fields */}
-          {form.category === 'Filament' && (
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className={labelCls}>Material</label>
-                <select value={form.material ?? 'PLA'} onChange={(e) => set('material', e.target.value)} className={inputCls}>
-                  {MATERIALS.map((m) => <option key={m} value={m}>{m}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className={labelCls}>Color</label>
-                <input value={form.color ?? ''} onChange={(e) => set('color', e.target.value)} className={inputCls} placeholder="e.g. Galaxy Blue" />
-              </div>
-            </div>
-          )}
-
-          {form.category === 'Insert' && (
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className={labelCls}>Insert Size</label>
-                <select value={form.insertSize ?? 'M3'} onChange={(e) => set('insertSize', e.target.value)} className={inputCls}>
-                  {INSERT_SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className={labelCls}>Insert Type</label>
-                <select value={form.insertType ?? 'Heat-Set'} onChange={(e) => set('insertType', e.target.value)} className={inputCls}>
-                  {INSERT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-                </select>
-              </div>
-            </div>
-          )}
-
-          {/* Stock fields */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelCls}>Current Stock *</label>
-              <input required type="number" min={0} value={form.currentStock} onChange={(e) => set('currentStock', Number(e.target.value))} className={inputCls} />
-            </div>
-            <div>
-              <label className={labelCls}>Unit *</label>
-              <input required value={form.unit} onChange={(e) => set('unit', e.target.value)} className={inputCls} placeholder="spools, pcs…" />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelCls}>Safety Stock *</label>
-              <input required type="number" min={0} value={form.safetyStock} onChange={(e) => set('safetyStock', Number(e.target.value))} className={inputCls} />
-            </div>
-            <div>
-              <label className={labelCls}>Reorder Qty *</label>
-              <input required type="number" min={0} value={form.reorderQty} onChange={(e) => set('reorderQty', Number(e.target.value))} className={inputCls} />
-            </div>
-          </div>
-
-          <div>
-            <label className={labelCls}>Lead Time (days) *</label>
-            <input required type="number" min={1} value={form.leadTimeDays} onChange={(e) => set('leadTimeDays', Number(e.target.value))} className={inputCls} />
-          </div>
-
-          {/* Optional */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelCls}>Supplier</label>
-              <input value={form.supplier ?? ''} onChange={(e) => set('supplier', e.target.value)} className={inputCls} placeholder="Amazon, Hatchbox…" />
-            </div>
-            <div>
-              <label className={labelCls}>Unit Cost ($)</label>
-              <input type="number" min={0} step={0.01} value={form.unitCost ?? ''} onChange={(e) => set('unitCost', e.target.value ? Number(e.target.value) : undefined)} className={inputCls} placeholder="0.00" />
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800 mt-1">
-            {isEdit && onDelete ? (
-              confirmDelete ? (
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-red-600 dark:text-red-400">Delete this item?</span>
-                  <button type="button" onClick={() => { onDelete(initial!.id); handleClose(); }}
-                    className="text-xs px-2.5 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium">
-                    Confirm
-                  </button>
-                  <button type="button" onClick={() => setConfirmDelete(false)}
-                    className="text-xs px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg transition-colors">
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <button type="button" onClick={() => setConfirmDelete(true)}
-                  className="flex items-center gap-1.5 text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">
-                  <Trash2 size={13} /> Delete
-                </button>
-              )
-            ) : <span />}
-
-            <div className="flex gap-2">
-              <button type="button" onClick={handleClose}
-                className="px-4 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors font-medium">
+  const footer = (
+    <div className="flex items-center justify-between w-full">
+      {/* Left: delete */}
+      <div>
+        {isEdit && onDelete && (
+          confirmDelete ? (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-[var(--color-danger)]">Delete this item?</span>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => { onDelete(initial!.id); onClose(); }}
+              >
+                Confirm
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setConfirmDelete(false)}
+              >
                 Cancel
-              </button>
-              <button type="submit"
-                className="px-4 py-2 text-sm rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition-colors font-medium">
-                {isEdit ? 'Save' : 'Add Item'}
-              </button>
+              </Button>
             </div>
-          </div>
-        </form>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              iconLeft={<Trash2 size={13} />}
+              onClick={() => setConfirmDelete(true)}
+              className="text-[var(--color-danger)] hover:text-[var(--color-danger)]"
+            >
+              Delete
+            </Button>
+          )
+        )}
+      </div>
+      {/* Right: cancel / save */}
+      <div className="flex gap-2">
+        <Button variant="secondary" size="md" onClick={onClose}>Cancel</Button>
+        <Button variant="primary" size="md" type="submit" form="print-item-form">
+          {isEdit ? 'Save Changes' : 'Add Item'}
+        </Button>
       </div>
     </div>
+  );
+
+  return (
+    <Modal
+      open
+      onClose={onClose}
+      title={isEdit ? 'Edit Item' : 'Add Item'}
+      footer={footer}
+    >
+      <form id="print-item-form" onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <Field label="Name *">
+          <Input
+            required
+            value={form.name}
+            onChange={(e) => set('name', e.target.value)}
+            placeholder="e.g. Black PLA, M3 Insert, 0.4mm Nozzle"
+          />
+        </Field>
+
+        <Field label="Category *">
+          <Select
+            value={form.category}
+            onChange={(e) => handleCategoryChange(e.target.value as PrintCategory)}
+          >
+            {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+          </Select>
+        </Field>
+
+        {form.category === 'Filament' && (
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Material">
+              <Select value={form.material ?? 'PLA'} onChange={(e) => set('material', e.target.value)}>
+                {MATERIALS.map((m) => <option key={m} value={m}>{m}</option>)}
+              </Select>
+            </Field>
+            <Field label="Color">
+              <Input
+                value={form.color ?? ''}
+                onChange={(e) => set('color', e.target.value)}
+                placeholder="e.g. Galaxy Blue"
+              />
+            </Field>
+          </div>
+        )}
+
+        {form.category === 'Insert' && (
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Insert Size">
+              <Select value={form.insertSize ?? 'M3'} onChange={(e) => set('insertSize', e.target.value)}>
+                {INSERT_SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
+              </Select>
+            </Field>
+            <Field label="Insert Type">
+              <Select value={form.insertType ?? 'Heat-Set'} onChange={(e) => set('insertType', e.target.value)}>
+                {INSERT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+              </Select>
+            </Field>
+          </div>
+        )}
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Current Stock *">
+            <Input
+              required
+              type="number"
+              min={0}
+              value={form.currentStock}
+              onChange={(e) => set('currentStock', Number(e.target.value))}
+            />
+          </Field>
+          <Field label="Unit *">
+            <Input
+              required
+              value={form.unit}
+              onChange={(e) => set('unit', e.target.value)}
+              placeholder="spools, pcs…"
+            />
+          </Field>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Safety Stock *">
+            <Input
+              required
+              type="number"
+              min={0}
+              value={form.safetyStock}
+              onChange={(e) => set('safetyStock', Number(e.target.value))}
+            />
+          </Field>
+          <Field label="Reorder Qty *">
+            <Input
+              required
+              type="number"
+              min={0}
+              value={form.reorderQty}
+              onChange={(e) => set('reorderQty', Number(e.target.value))}
+            />
+          </Field>
+        </div>
+
+        <Field label="Lead Time (days) *">
+          <Input
+            required
+            type="number"
+            min={1}
+            value={form.leadTimeDays}
+            onChange={(e) => set('leadTimeDays', Number(e.target.value))}
+          />
+        </Field>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Supplier">
+            <Input
+              value={form.supplier ?? ''}
+              onChange={(e) => set('supplier', e.target.value)}
+              placeholder="Amazon, Hatchbox…"
+            />
+          </Field>
+          <Field label="Unit Cost ($)">
+            <Input
+              type="number"
+              min={0}
+              step={0.01}
+              value={form.unitCost ?? ''}
+              onChange={(e) => set('unitCost', e.target.value ? Number(e.target.value) : undefined)}
+              placeholder="0.00"
+            />
+          </Field>
+        </div>
+      </form>
+    </Modal>
   );
 }

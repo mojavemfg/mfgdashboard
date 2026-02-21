@@ -3,6 +3,7 @@ import { ArrowRight, MapPin, Package, Printer, Truck } from 'lucide-react';
 import type { View } from '@/App';
 import type { InventoryMetrics } from '@/hooks/useInventoryMetrics';
 import type { SalesMetrics } from '@/hooks/useDashboardSalesMetrics';
+import { Badge } from '@/components/ui/Badge';
 
 interface OperationsHealthSectionProps {
   inventoryMetrics: InventoryMetrics;
@@ -21,18 +22,19 @@ interface HealthCardProps {
 
 function HealthCard({ icon, title, children, onNavigate }: HealthCardProps) {
   return (
-    <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/50 p-4 flex flex-col gap-2.5">
+    <div className="bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-4 flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-slate-400 dark:text-slate-500">{icon}</span>
-          <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wide">
+          <span className="text-[var(--color-text-tertiary)]">{icon}</span>
+          <span className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-wide">
             {title}
           </span>
         </div>
         {onNavigate && (
           <button
             onClick={onNavigate}
-            className="text-slate-300 dark:text-slate-600 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+            className="text-[var(--color-text-tertiary)] hover:text-[var(--color-brand)] transition-colors duration-150 focus-visible:outline-none"
+            aria-label={`Navigate to ${title}`}
           >
             <ArrowRight size={14} />
           </button>
@@ -40,28 +42,6 @@ function HealthCard({ icon, title, children, onNavigate }: HealthCardProps) {
       </div>
       <div>{children}</div>
     </div>
-  );
-}
-
-function StatusPill({
-  count,
-  label,
-  color,
-}: {
-  count: number;
-  label: string;
-  color: 'red' | 'amber' | 'green';
-}) {
-  const cls =
-    color === 'red'
-      ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
-      : color === 'amber'
-      ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
-      : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400';
-  return (
-    <span className={`inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-lg ${cls}`}>
-      {count} {label}
-    </span>
   );
 }
 
@@ -76,104 +56,69 @@ export function OperationsHealthSection({
   const { unshippedCount, topCountries } = salesMetrics;
 
   const shippedCount = totalOrders - unshippedCount;
-  const shipPct = totalOrders > 0 ? (shippedCount / totalOrders) * 100 : 0;
-  const invHealthy = totalComponents - criticalCount - warningCount;
+  const shipPct      = totalOrders > 0 ? (shippedCount / totalOrders) * 100 : 0;
+  const invHealthy   = totalComponents - criticalCount - warningCount;
   const printHealthy = printKpis.total - printKpis.critical - printKpis.warning;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
       {/* Fulfillment */}
-      <HealthCard
-        icon={<Truck size={15} />}
-        title="Fulfillment"
-        onNavigate={() => onNavigate('orders')}
-      >
+      <HealthCard icon={<Truck size={14} />} title="Fulfillment" onNavigate={() => onNavigate('orders')}>
         {totalOrders === 0 ? (
-          <p className="text-xs text-slate-400 dark:text-slate-500">No orders loaded</p>
+          <p className="text-xs text-[var(--color-text-tertiary)]">No orders loaded</p>
         ) : (
           <>
-            <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="text-slate-600 dark:text-slate-300 font-medium">
+            <div className="flex items-center justify-between text-xs mb-2">
+              <span className="text-[var(--color-text-secondary)]">
                 {shippedCount} / {totalOrders} shipped
               </span>
-              <span
-                className={`font-semibold tabular-nums ${
-                  unshippedCount > 5
-                    ? 'text-red-600 dark:text-red-400'
-                    : 'text-emerald-600 dark:text-emerald-400'
-                }`}
-              >
+              <span className={`font-semibold tabular-nums ${unshippedCount > 5 ? 'text-[var(--color-danger)]' : 'text-[var(--color-success)]'}`}>
                 {shipPct.toFixed(0)}%
               </span>
             </div>
-            <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+            <div className="h-1 bg-[var(--color-bg-muted)] rounded-[var(--radius-full)] overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all ${
-                  unshippedCount > 5 ? 'bg-red-500' : 'bg-emerald-500'
-                }`}
+                className={`h-full rounded-[var(--radius-full)] transition-all ${unshippedCount > 5 ? 'bg-[var(--color-danger)]' : 'bg-[var(--color-success)]'}`}
                 style={{ width: `${shipPct}%` }}
               />
             </div>
             {unshippedCount > 0 && (
-              <p className="text-xs text-amber-600 dark:text-amber-400 mt-1.5 font-medium">
-                {unshippedCount} unshipped
-              </p>
+              <p className="text-xs text-[var(--color-warning)] mt-2">{unshippedCount} unshipped</p>
             )}
           </>
         )}
       </HealthCard>
 
       {/* Component inventory */}
-      <HealthCard
-        icon={<Package size={15} />}
-        title="Components"
-      >
+      <HealthCard icon={<Package size={14} />} title="Components">
         <div className="flex flex-wrap gap-1.5">
-          <StatusPill count={invHealthy} label="OK" color="green" />
-          {warningCount > 0 && <StatusPill count={warningCount} label="warning" color="amber" />}
-          {criticalCount > 0 && <StatusPill count={criticalCount} label="critical" color="red" />}
+          <Badge variant="success">{invHealthy} OK</Badge>
+          {warningCount > 0 && <Badge variant="warning">{warningCount} warning</Badge>}
+          {criticalCount > 0 && <Badge variant="danger">{criticalCount} critical</Badge>}
         </div>
       </HealthCard>
 
       {/* Print inventory */}
-      <HealthCard
-        icon={<Printer size={15} />}
-        title="Print Inventory"
-        onNavigate={() => onNavigate('inventory')}
-      >
+      <HealthCard icon={<Printer size={14} />} title="Print Inventory" onNavigate={() => onNavigate('inventory')}>
         <div className="flex flex-wrap gap-1.5">
-          <StatusPill count={printHealthy} label="OK" color="green" />
-          {printKpis.warning > 0 && (
-            <StatusPill count={printKpis.warning} label="warning" color="amber" />
-          )}
-          {printKpis.critical > 0 && (
-            <StatusPill count={printKpis.critical} label="critical" color="red" />
-          )}
+          <Badge variant="success">{printHealthy} OK</Badge>
+          {printKpis.warning > 0 && <Badge variant="warning">{printKpis.warning} warning</Badge>}
+          {printKpis.critical > 0 && <Badge variant="danger">{printKpis.critical} critical</Badge>}
         </div>
       </HealthCard>
 
       {/* Top markets */}
-      <HealthCard
-        icon={<MapPin size={15} />}
-        title="Top Markets"
-        onNavigate={() => onNavigate('salesmap')}
-      >
+      <HealthCard icon={<MapPin size={14} />} title="Top Markets" onNavigate={() => onNavigate('salesmap')}>
         {topCountries.length === 0 ? (
-          <p className="text-xs text-slate-400 dark:text-slate-500">No orders loaded</p>
+          <p className="text-xs text-[var(--color-text-tertiary)]">No orders loaded</p>
         ) : (
           <div className="space-y-1.5">
             {topCountries.map((c, i) => (
               <div key={c.country} className="flex items-center justify-between text-xs">
-                <span
-                  className={
-                    i === 0
-                      ? 'font-semibold text-slate-700 dark:text-slate-200 truncate'
-                      : 'text-slate-500 dark:text-slate-400 truncate'
-                  }
-                >
+                <span className={i === 0 ? 'font-medium text-[var(--color-text-primary)] truncate' : 'text-[var(--color-text-secondary)] truncate'}>
                   {c.country}
                 </span>
-                <span className="tabular-nums text-slate-500 dark:text-slate-400 ml-2 shrink-0">
+                <span className="tabular-nums text-[var(--color-text-tertiary)] ml-2 shrink-0">
                   {c.count}
                 </span>
               </div>

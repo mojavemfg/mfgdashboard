@@ -23,10 +23,10 @@ export function ListingsSummaryStrip({ listings }: Props) {
         { label: 'Avg Score', value: `${avgScore}`, valueClass: scoreColor },
         { label: 'Tag Gaps', value: `${tagGaps}`, valueClass: tagGaps > 0 ? 'text-yellow-600 dark:text-yellow-400' : 'text-emerald-600 dark:text-emerald-400' },
         { label: 'Low Images (<5)', value: `${lowImages}`, valueClass: lowImages > 0 ? 'text-yellow-600 dark:text-yellow-400' : 'text-emerald-600 dark:text-emerald-400' },
-        { label: 'AI Tags Ready', value: `${aiDone}/${listings.length}`, valueClass: 'text-slate-700 dark:text-slate-300' },
+        { label: 'AI Tags Ready', value: `${aiDone}/${listings.length}`, valueClass: 'text-[var(--color-text-secondary)]' },
       ].map(({ label, value, valueClass }) => (
-        <div key={label} className="bg-white dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/50 px-4 py-3 shadow-sm dark:shadow-none">
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold mb-1">{label}</p>
+        <div key={label} className="bg-[var(--color-bg)] rounded-[var(--radius-lg)] border border-[var(--color-border)] px-4 py-3">
+          <p className="text-[11px] text-[var(--color-text-tertiary)] uppercase tracking-wider font-semibold mb-1">{label}</p>
           <p className={`text-2xl font-bold ${valueClass}`}>{value}</p>
         </div>
       ))}

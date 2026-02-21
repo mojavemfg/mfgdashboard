@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { ShoppingBag, Globe, DollarSign } from 'lucide-react';
+import { Globe } from 'lucide-react';
 import { PageSection } from '@/components/layout/PageSection';
 import { KpiCard } from '@/components/kpi/KpiCard';
 import { statsByUsState, statsByCountry, toSaleRecords } from '@/lib/salesMapData';
@@ -65,8 +65,8 @@ export function SalesMapView({ isDark, orders, onMerge, onClear }: SalesMapViewP
                     onClick={() => setSelectedYear(yr)}
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer border-none ${
                       selectedYear === yr
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                        ? 'bg-[var(--color-brand)] text-white'
+                        : 'bg-[var(--color-bg-muted)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]'
                     }`}
                   >
                     {yr === 'all' ? 'All Years' : yr}
@@ -81,8 +81,6 @@ export function SalesMapView({ isDark, orders, onMerge, onClear }: SalesMapViewP
               <KpiCard
                 label="Total Orders"
                 value={filteredOrders.length.toLocaleString()}
-                icon={<ShoppingBag size={18} />}
-                accent="blue"
               />
               <KpiCard
                 label="Total Revenue"
@@ -90,20 +88,16 @@ export function SalesMapView({ isDark, orders, onMerge, onClear }: SalesMapViewP
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}`}
-                icon={<DollarSign size={18} />}
-                accent="green"
               />
               <KpiCard
                 label="Countries"
                 value={countryStats.length}
-                icon={<Globe size={18} />}
-                accent="blue"
               />
             </div>
           </PageSection>
 
           <PageSection title="Map">
-            <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/50 p-4 shadow-sm">
+            <div className="bg-[var(--color-bg)] rounded-[var(--radius-lg)] border border-[var(--color-border)] p-4">
               <div className="flex gap-2 mb-4">
                 {(['us', 'world'] as const).map((v) => (
                   <button
@@ -111,8 +105,8 @@ export function SalesMapView({ isDark, orders, onMerge, onClear }: SalesMapViewP
                     onClick={() => setMapView(v)}
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer border-none ${
                       mapView === v
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                        ? 'bg-[var(--color-brand)] text-white'
+                        : 'bg-[var(--color-bg-muted)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]'
                     }`}
                   >
                     {v === 'us' ? 'US States' : 'World'}
@@ -132,7 +126,7 @@ export function SalesMapView({ isDark, orders, onMerge, onClear }: SalesMapViewP
           </PageSection>
         </>
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
+        <div className="flex flex-col items-center justify-center py-20 text-[var(--color-text-tertiary)]">
           <Globe size={48} className="mb-4 opacity-30" />
           <p className="text-base font-medium">No sales data yet</p>
           <p className="text-sm mt-1">Upload an Etsy sold-orders CSV above to get started</p>

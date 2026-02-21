@@ -1,10 +1,7 @@
 import { useState } from 'react';
 import { Download, Trash2 } from 'lucide-react';
-
-const cardCls   = 'bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-none p-5';
-const labelCls  = 'text-sm font-medium text-slate-800 dark:text-slate-200';
-const hintCls   = 'text-xs text-slate-500 dark:text-slate-400';
-const dangerCls = 'flex items-center justify-between py-3 border-b border-slate-100 dark:border-slate-700/50 last:border-0';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 
 const DATA_STORES = [
   { key: 'mfg_settings',           label: 'App Settings' },
@@ -23,7 +20,9 @@ export function DataManagementSection() {
       try {
         const raw = localStorage.getItem(key);
         if (raw) data[key] = JSON.parse(raw);
-      } catch { data[key] = localStorage.getItem(key); }
+      } catch {
+        data[key] = localStorage.getItem(key);
+      }
     });
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url  = URL.createObjectURL(blob);
@@ -41,47 +40,49 @@ export function DataManagementSection() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className={cardCls}>
+    <div className="flex flex-col gap-4">
+      {/* Export */}
+      <Card>
         <div className="flex items-center justify-between">
           <div>
-            <p className={labelCls}>Export All Data</p>
-            <p className={hintCls}>Download a JSON backup of all stored app data</p>
+            <p className="text-sm font-medium text-[var(--color-text-primary)]">Export All Data</p>
+            <p className="text-xs text-[var(--color-text-tertiary)] mt-0.5">
+              Download a JSON backup of all stored app data
+            </p>
           </div>
-          <button
-            onClick={exportAll}
-            className="flex items-center gap-2 px-3 py-2 text-xs font-semibold bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors border-none cursor-pointer"
-          >
-            <Download size={13} />
+          <Button variant="primary" size="sm" iconLeft={<Download size={13} />} onClick={exportAll}>
             Export
-          </button>
+          </Button>
         </div>
-      </div>
+      </Card>
 
-      <div className={cardCls}>
-        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
+      {/* Clear individual stores */}
+      <Card>
+        <p className="text-xs font-semibold text-[var(--color-text-tertiary)] uppercase tracking-widest mb-3">
           Clear Data
         </p>
-        <div>
+        <div className="divide-y divide-[var(--color-border)]">
           {DATA_STORES.map(({ key, label }) => (
-            <div key={key} className={dangerCls}>
+            <div key={key} className="flex items-center justify-between py-3">
               <div>
-                <p className={labelCls}>{label}</p>
-                <p className={hintCls}>{key}</p>
+                <p className="text-sm font-medium text-[var(--color-text-primary)]">{label}</p>
+                <p className="text-xs text-[var(--color-text-tertiary)] font-mono mt-0.5">{key}</p>
               </div>
-              <button
+              <Button
+                variant="danger"
+                size="sm"
+                iconLeft={cleared !== key ? <Trash2 size={12} /> : undefined}
                 onClick={() => clearStore(key)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer bg-transparent"
               >
-                {cleared === key ? 'Cleared' : <><Trash2 size={12} /> Clear</>}
-              </button>
+                {cleared === key ? 'Cleared' : 'Clear'}
+              </Button>
             </div>
           ))}
         </div>
-        <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">
-          Clearing data is immediate and cannot be undone. Export first if you want a backup.
+        <p className="mt-3 text-xs text-[var(--color-text-tertiary)]">
+          Clearing is immediate and cannot be undone. Export first if you want a backup.
         </p>
-      </div>
+      </Card>
     </div>
   );
 }

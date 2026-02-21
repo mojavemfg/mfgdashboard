@@ -384,8 +384,8 @@ function CharBar({ count }: { count: number }) {
   const pct = Math.min(100, (count / MAX_CHARS) * 100);
   const color = count > MAX_CHARS ? 'bg-red-500' : count >= 17 ? 'bg-yellow-500' : 'bg-emerald-500';
   return (
-    <div className="w-full h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden mt-1.5">
-      <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${pct}%` }} />
+    <div className="w-full h-1 bg-[var(--color-bg-muted)] rounded-[var(--radius-full)] overflow-hidden mt-1.5">
+      <div className={`h-full rounded-[var(--radius-full)] transition-all ${color}`} style={{ width: `${pct}%` }} />
     </div>
   );
 }
@@ -403,29 +403,29 @@ function TagCard({ result, index, onCopy, copied }: {
     : 'border-red-300 dark:border-red-600/50';
 
   const bg = result.valid
-    ? 'bg-white dark:bg-slate-800/60'
+    ? 'bg-[var(--color-bg)]'
     : 'bg-red-50 dark:bg-red-950/20';
 
   return (
-    <div className={`rounded-xl border ${borderColor} ${bg} p-3 flex flex-col gap-1.5 group shadow-sm dark:shadow-none`}>
+    <div className={`rounded-[var(--radius-lg)] border ${borderColor} ${bg} p-3 flex flex-col gap-1.5 group`}>
       <div className="flex items-start justify-between gap-2">
-        <span className="text-slate-800 dark:text-slate-100 text-sm font-medium leading-snug break-words flex-1">
+        <span className="text-[var(--color-text-primary)] text-sm font-medium leading-snug break-words flex-1">
           {result.tag}
         </span>
         <button
           onClick={() => onCopy(index)}
-          className="shrink-0 p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer border-none bg-transparent"
+          className="shrink-0 p-1 rounded-[var(--radius-md)] text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-muted)] transition-colors cursor-pointer border-none bg-transparent"
           aria-label="Copy tag"
         >
           {copied ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
         </button>
       </div>
       <div className="flex items-center justify-between">
-        <span className={`text-[10px] font-mono ${result.charCount > MAX_CHARS ? 'text-red-500' : 'text-slate-400'}`}>
+        <span className={`text-[10px] font-mono ${result.charCount > MAX_CHARS ? 'text-[var(--color-danger)]' : 'text-[var(--color-text-tertiary)]'}`}>
           {result.charCount}/{MAX_CHARS}
         </span>
         {!result.valid && (
-          <span className="text-[9px] text-red-500 font-semibold">TOO LONG</span>
+          <span className="text-[9px] text-[var(--color-danger)] font-semibold">TOO LONG</span>
         )}
       </div>
       <CharBar count={result.charCount} />
@@ -587,45 +587,45 @@ export function EtsySeoTool() {
   const validCount = result?.tags.filter((t) => t.valid).length ?? 0;
 
   const inputCls =
-    'w-full bg-white dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/60 text-slate-900 dark:text-slate-200 text-sm rounded-xl px-3.5 py-2.5 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-500/60 transition-colors';
+    'w-full bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm rounded-[var(--radius-md)] px-3.5 py-2.5 placeholder:text-[var(--color-text-tertiary)] focus:outline-none focus:border-[var(--color-brand)] focus:shadow-[0_0_0_3px_var(--color-brand-subtle)] transition-colors';
 
   return (
     <div className="max-w-3xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="bg-orange-500/15 dark:bg-orange-500/20 p-2.5 rounded-xl">
+        <div className="bg-orange-500/15 dark:bg-orange-500/20 p-2.5 rounded-[var(--radius-lg)]">
           <Tag className="text-orange-600 dark:text-orange-400" size={22} />
         </div>
         <div>
-          <h1 className="text-slate-900 dark:text-white text-xl font-bold leading-tight">Etsy SEO Tag Generator</h1>
-          <p className="text-slate-500 text-sm mt-0.5">AI-powered tag optimization · 13 tags · 20 char limit</p>
+          <h1 className="text-xl font-semibold tracking-tight text-[var(--color-text-primary)] mb-6">Etsy SEO Tag Generator</h1>
+          <p className="text-[var(--color-text-tertiary)] text-sm mt-0.5">AI-powered tag optimization · 13 tags · 20 char limit</p>
         </div>
       </div>
 
       {/* API Key Panel */}
-      <div className="mb-4 bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-none overflow-hidden">
+      <div className="mb-4 bg-[var(--color-bg)] rounded-[var(--radius-lg)] border border-[var(--color-border)] overflow-hidden">
         <button
           onClick={() => setShowKeyPanel((p) => !p)}
           className="w-full flex items-center justify-between px-4 py-3 cursor-pointer border-none bg-transparent text-left"
         >
           <div className="flex items-center gap-2.5">
-            <Key size={15} className={hasKey ? 'text-emerald-500' : 'text-slate-400'} />
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            <Key size={15} className={hasKey ? 'text-emerald-500' : 'text-[var(--color-text-tertiary)]'} />
+            <span className="text-sm font-medium text-[var(--color-text-secondary)]">
               {hasKey
                 ? `${PROVIDERS.find((p) => p.id === activeProvider)!.label} API Key connected`
                 : 'Connect AI API Key'}
             </span>
             {hasKey && (
-              <span className="text-[10px] bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-600/30 px-2 py-0.5 rounded-full font-medium">
+              <span className="text-[10px] bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-600/30 px-2 py-0.5 rounded-[var(--radius-full)] font-medium">
                 ACTIVE
               </span>
             )}
           </div>
-          {showKeyPanel ? <ChevronUp size={16} className="text-slate-400" /> : <ChevronDown size={16} className="text-slate-400" />}
+          {showKeyPanel ? <ChevronUp size={16} className="text-[var(--color-text-tertiary)]" /> : <ChevronDown size={16} className="text-[var(--color-text-tertiary)]" />}
         </button>
 
         {showKeyPanel && (
-          <div className="border-t border-slate-100 dark:border-slate-700/40">
+          <div className="border-t border-[var(--color-border)]">
             {/* Provider tabs */}
             <div role="tablist" aria-label="AI provider" className="flex gap-1 p-3 pb-0">
               {PROVIDERS.map((p) => (
@@ -634,15 +634,15 @@ export function EtsySeoTool() {
                   role="tab"
                   aria-selected={activeProvider === p.id}
                   onClick={() => switchProvider(p.id)}
-                  className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer border-none ${
+                  className={`flex-1 py-1.5 text-xs font-semibold rounded-[var(--radius-md)] transition-all cursor-pointer border-none ${
                     activeProvider === p.id
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-slate-100 dark:bg-slate-900/50 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                      ? 'bg-[var(--color-brand)] text-white'
+                      : 'bg-[var(--color-bg-subtle)] text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]'
                   }`}
                 >
                   {p.label}
                   {keys[p.id] && (
-                    <span className="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 align-middle" />
+                    <span className="ml-1 inline-block w-1.5 h-1.5 rounded-[var(--radius-full)] bg-emerald-400 align-middle" />
                   )}
                 </button>
               ))}
@@ -655,10 +655,10 @@ export function EtsySeoTool() {
                 const { href, label } = CONSOLE_URLS[activeProvider];
                 return (
                   <>
-                    <p className="text-slate-500 text-xs leading-relaxed">
+                    <p className="text-[var(--color-text-tertiary)] text-xs leading-relaxed">
                       Your {activeProviderConfig.label} API key is stored locally and never sent anywhere except {activeProviderConfig.label}'s API.
                       Get one at{' '}
-                      <a href={href} target="_blank" rel="noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-0.5">
+                      <a href={href} target="_blank" rel="noreferrer" className="text-[var(--color-brand)] hover:underline inline-flex items-center gap-0.5">
                         {label} <ExternalLink size={10} />
                       </a>
                     </p>
@@ -674,13 +674,13 @@ export function EtsySeoTool() {
                       <button
                         onClick={saveKey}
                         disabled={!keyDraft.trim()}
-                        className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white text-sm font-medium rounded-xl transition-colors cursor-pointer border-none shrink-0"
+                        className="px-4 py-2.5 bg-[var(--color-brand)] hover:bg-[var(--color-brand-hover)] disabled:opacity-40 text-white text-sm font-medium rounded-[var(--radius-lg)] transition-colors cursor-pointer border-none shrink-0"
                       >
                         Save
                       </button>
                     </div>
                     {keys[activeProvider] && (
-                      <button onClick={clearKey} className="text-xs text-red-500 hover:text-red-600 cursor-pointer border-none bg-transparent p-0 transition-colors">
+                      <button onClick={clearKey} className="text-xs text-[var(--color-danger)] hover:opacity-80 cursor-pointer border-none bg-transparent p-0 transition-colors">
                         Remove saved key
                       </button>
                     )}
@@ -693,17 +693,17 @@ export function EtsySeoTool() {
       </div>
 
       {/* Input Card */}
-      <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-none p-4 sm:p-5 mb-4">
+      <div className="bg-[var(--color-bg)] rounded-[var(--radius-lg)] border border-[var(--color-border)] p-4 sm:p-5 mb-4">
         {/* Mode Tabs */}
-        <div className="flex gap-1 bg-slate-100 dark:bg-slate-900/50 rounded-xl p-1 mb-4">
+        <div className="flex gap-1 bg-[var(--color-bg-subtle)] rounded-[var(--radius-lg)] p-1 mb-4">
           {([['url', Link2, 'From URL'], ['manual', PenLine, 'Manual Entry']] as const).map(([m, Icon, label]) => (
             <button
               key={m}
               onClick={() => setMode(m)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all cursor-pointer border-none ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-[var(--radius-md)] transition-all cursor-pointer border-none ${
                 mode === m
-                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 bg-transparent'
+                  ? 'bg-[var(--color-bg)] text-[var(--color-text-primary)] shadow-[var(--shadow-xs)]'
+                  : 'text-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)] bg-transparent'
               }`}
             >
               <Icon size={14} />
@@ -714,7 +714,7 @@ export function EtsySeoTool() {
 
         {mode === 'url' ? (
           <div className="space-y-3">
-            <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-[var(--color-text-tertiary)] uppercase tracking-wider mb-1.5">
               Etsy Listing URL
             </label>
             <input
@@ -724,14 +724,14 @@ export function EtsySeoTool() {
               onChange={(e) => setUrl(e.target.value)}
               className={inputCls}
             />
-            <p className="text-slate-400 text-xs">
+            <p className="text-[var(--color-text-tertiary)] text-xs">
               We'll auto-fetch the listing title and description, then AI will generate tags.
             </p>
           </div>
         ) : (
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-semibold text-[var(--color-text-tertiary)] uppercase tracking-wider mb-1.5">
                 Listing Title <span className="text-red-400">*</span>
               </label>
               <input
@@ -743,8 +743,8 @@ export function EtsySeoTool() {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-                Description <span className="text-slate-400 font-normal">(optional but improves quality)</span>
+              <label className="block text-xs font-semibold text-[var(--color-text-tertiary)] uppercase tracking-wider mb-1.5">
+                Description <span className="text-[var(--color-text-tertiary)] font-normal">(optional but improves quality)</span>
               </label>
               <textarea
                 rows={4}
@@ -755,8 +755,8 @@ export function EtsySeoTool() {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-                Category <span className="text-slate-400 font-normal">(optional)</span>
+              <label className="block text-xs font-semibold text-[var(--color-text-tertiary)] uppercase tracking-wider mb-1.5">
+                Category <span className="text-[var(--color-text-tertiary)] font-normal">(optional)</span>
               </label>
               <input
                 type="text"
@@ -773,7 +773,7 @@ export function EtsySeoTool() {
         <button
           onClick={analyze}
           disabled={!canAnalyze || isLoading}
-          className="mt-4 w-full flex items-center justify-center gap-2.5 py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors cursor-pointer border-none text-sm shadow-sm"
+          className="mt-4 w-full flex items-center justify-center gap-2.5 py-3 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-[var(--radius-lg)] transition-colors cursor-pointer border-none text-sm"
         >
           {isLoading ? (
             <>
@@ -793,7 +793,7 @@ export function EtsySeoTool() {
         <button
           onClick={() => { void generateDescription(); }}
           disabled={!canAnalyze || descStatus === 'loading'}
-          className="mt-2 w-full flex items-center justify-center gap-2.5 py-3 bg-slate-700 hover:bg-slate-800 dark:bg-slate-700/80 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors cursor-pointer border-none text-sm shadow-sm"
+          className="mt-2 w-full flex items-center justify-center gap-2.5 py-3 bg-[var(--color-bg-muted)] hover:bg-[var(--color-border)] border border-[var(--color-border)] disabled:opacity-40 disabled:cursor-not-allowed text-[var(--color-text-secondary)] font-semibold rounded-[var(--radius-lg)] transition-colors cursor-pointer text-sm"
         >
           {descStatus === 'loading' ? (
             <>
@@ -809,7 +809,7 @@ export function EtsySeoTool() {
         </button>
 
         {!hasKey && (
-          <p className="mt-2.5 text-center text-xs text-slate-400">
+          <p className="mt-2.5 text-center text-xs text-[var(--color-text-tertiary)]">
             Add your {PROVIDERS.find((p) => p.id === activeProvider)!.label} API key above to get started.
           </p>
         )}
@@ -817,13 +817,13 @@ export function EtsySeoTool() {
 
       {/* Fetch fallback note */}
       {fetchNote && status !== 'error' && (
-        <div className="mb-4 flex items-start gap-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-700/50 rounded-xl px-4 py-3">
-          <AlertCircle size={15} className="text-amber-500 shrink-0 mt-0.5" />
+        <div className="mb-4 flex items-start gap-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-700/50 rounded-[var(--radius-lg)] px-4 py-3">
+          <AlertCircle size={15} className="text-[var(--color-warning)] shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="text-amber-700 dark:text-amber-400 text-xs leading-relaxed">{fetchNote}</p>
+            <p className="text-[var(--color-warning)] text-xs leading-relaxed">{fetchNote}</p>
             <button
               onClick={() => setMode('manual')}
-              className="mt-1.5 text-xs font-semibold text-amber-700 dark:text-amber-400 underline underline-offset-2 cursor-pointer border-none bg-transparent p-0 hover:text-amber-900 dark:hover:text-amber-200 transition-colors"
+              className="mt-1.5 text-xs font-semibold text-[var(--color-warning)] underline underline-offset-2 cursor-pointer border-none bg-transparent p-0 hover:opacity-80 transition-colors"
             >
               Switch to Manual Entry →
             </button>
@@ -833,13 +833,13 @@ export function EtsySeoTool() {
 
       {/* Error */}
       {status === 'error' && error && (
-        <div className="mb-4 flex items-start gap-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/50 rounded-xl px-4 py-3.5">
-          <AlertCircle size={16} className="text-red-500 shrink-0 mt-0.5" />
+        <div className="mb-4 flex items-start gap-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/50 rounded-[var(--radius-lg)] px-4 py-3.5">
+          <AlertCircle size={16} className="text-[var(--color-danger)] shrink-0 mt-0.5" />
           <div>
-            <p className="text-red-700 dark:text-red-400 text-sm font-medium">Analysis failed</p>
-            <p className="text-red-600 dark:text-red-500 text-xs mt-0.5">{error}</p>
+            <p className="text-[var(--color-danger)] text-sm font-medium">Analysis failed</p>
+            <p className="text-[var(--color-danger)] text-xs mt-0.5 opacity-80">{error}</p>
             {error.includes('fetch') || error.includes('Proxy') ? (
-              <p className="text-slate-500 text-xs mt-1">
+              <p className="text-[var(--color-text-tertiary)] text-xs mt-1">
                 Tip: Switch to <strong>Manual Entry</strong> mode and paste the listing details directly.
               </p>
             ) : null}
@@ -849,11 +849,11 @@ export function EtsySeoTool() {
 
       {/* Description error */}
       {descStatus === 'error' && descError && (
-        <div className="mb-4 flex items-start gap-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/50 rounded-xl px-4 py-3.5">
-          <AlertCircle size={16} className="text-red-500 shrink-0 mt-0.5" />
+        <div className="mb-4 flex items-start gap-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/50 rounded-[var(--radius-lg)] px-4 py-3.5">
+          <AlertCircle size={16} className="text-[var(--color-danger)] shrink-0 mt-0.5" />
           <div>
-            <p className="text-red-700 dark:text-red-400 text-sm font-medium">Description generation failed</p>
-            <p className="text-red-600 dark:text-red-500 text-xs mt-0.5">{descError}</p>
+            <p className="text-[var(--color-danger)] text-sm font-medium">Description generation failed</p>
+            <p className="text-[var(--color-danger)] text-xs mt-0.5 opacity-80">{descError}</p>
           </div>
         </div>
       )}
@@ -864,10 +864,10 @@ export function EtsySeoTool() {
           {/* Stats row */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="text-slate-700 dark:text-slate-300 text-sm font-semibold">
+              <span className="text-[var(--color-text-secondary)] text-sm font-semibold">
                 {result.tags.length} tags generated
               </span>
-              <span className={`text-xs px-2 py-0.5 rounded-full font-medium border ${
+              <span className={`text-xs px-2 py-0.5 rounded-[var(--radius-full)] font-medium border ${
                 validCount === TAG_COUNT
                   ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-600/40'
                   : 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-500/15 dark:text-yellow-400 dark:border-yellow-600/40'
@@ -877,7 +877,7 @@ export function EtsySeoTool() {
             </div>
             <button
               onClick={copyAll}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium rounded-lg transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-bg-muted)] hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] text-xs font-medium rounded-[var(--radius-md)] transition-colors cursor-pointer border border-[var(--color-border)]"
             >
               {copiedAll ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
               {copiedAll ? 'Copied!' : 'Copy all tags'}
@@ -899,9 +899,9 @@ export function EtsySeoTool() {
 
           {/* Strategy note */}
           {result.strategy && (
-            <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/40 rounded-xl px-4 py-3 flex items-start gap-2.5">
-              <Sparkles size={14} className="text-blue-500 shrink-0 mt-0.5" />
-              <p className="text-blue-700 dark:text-blue-300 text-xs leading-relaxed">
+            <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/40 rounded-[var(--radius-lg)] px-4 py-3 flex items-start gap-2.5">
+              <Sparkles size={14} className="text-[var(--color-brand)] shrink-0 mt-0.5" />
+              <p className="text-[var(--color-brand)] text-xs leading-relaxed">
                 <span className="font-semibold">Strategy: </span>{result.strategy}
               </p>
             </div>
@@ -914,8 +914,8 @@ export function EtsySeoTool() {
               ['bg-yellow-500', '17–20 chars'],
               ['bg-red-500', '>20 chars'],
             ].map(([color, label]) => (
-              <span key={label} className="flex items-center gap-1.5 text-[10px] text-slate-400">
-                <span className={`w-2 h-2 rounded-full ${color} inline-block`} />
+              <span key={label} className="flex items-center gap-1.5 text-[10px] text-[var(--color-text-tertiary)]">
+                <span className={`w-2 h-2 rounded-[var(--radius-full)] ${color} inline-block`} />
                 {label}
               </span>
             ))}
@@ -925,15 +925,15 @@ export function EtsySeoTool() {
 
       {/* Refined Description result */}
       {descStatus === 'done' && refinedDescription && (
-        <div className="mt-4 bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-none p-4 sm:p-5">
+        <div className="mt-4 bg-[var(--color-bg)] rounded-[var(--radius-lg)] border border-[var(--color-border)] p-4 sm:p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <PenLine size={15} className="text-purple-500" />
-              <span className="text-slate-700 dark:text-slate-300 text-sm font-semibold">Refined Description</span>
+              <span className="text-[var(--color-text-secondary)] text-sm font-semibold">Refined Description</span>
             </div>
             <button
               onClick={() => { void copyDescription(); }}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-medium rounded-lg transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-bg-muted)] hover:bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] text-xs font-medium rounded-[var(--radius-md)] transition-colors cursor-pointer border border-[var(--color-border)]"
             >
               {copiedDesc ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
               {copiedDesc ? 'Copied!' : 'Copy'}
@@ -947,7 +947,7 @@ export function EtsySeoTool() {
           />
           <div className="flex items-center gap-2 mt-2.5">
             <Sparkles size={12} className="text-purple-400 shrink-0" />
-            <p className="text-slate-400 text-[11px]">
+            <p className="text-[var(--color-text-tertiary)] text-[11px]">
               Optimized for Etsy's above-the-fold hook — edit freely before copying to your listing.
             </p>
           </div>

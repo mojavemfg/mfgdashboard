@@ -3,6 +3,7 @@ import { Upload, Trash2 } from 'lucide-react';
 import { parseSalesCsv } from '@/lib/parseSalesCsv';
 import type { EtsyOrderItem } from '@/types';
 import type { MergeResult } from '@/hooks/useSalesOrders';
+import { Button } from '@/components/ui/Button';
 
 interface SalesMapUploadProps {
   onMerge: (records: EtsyOrderItem[]) => MergeResult;
@@ -12,14 +13,14 @@ interface SalesMapUploadProps {
 
 export function SalesMapUpload({ onMerge, onClear, totalItems }: SalesMapUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [dragging, setDragging] = useState(false);
-  const [lastResult, setLastResult] = useState<MergeResult | null>(null);
+  const [dragging, setDragging]       = useState(false);
+  const [lastResult, setLastResult]   = useState<MergeResult | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
 
   async function processFile(file: File) {
-    const text = await file.text();
+    const text    = await file.text();
     const { records } = parseSalesCsv(text);
-    const result = onMerge(records);
+    const result  = onMerge(records);
     setLastResult(result);
   }
 
@@ -31,31 +32,25 @@ export function SalesMapUpload({ onMerge, onClear, totalItems }: SalesMapUploadP
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
       <div
-        className={`flex-1 flex items-center gap-3 border-2 border-dashed rounded-xl px-4 py-3 cursor-pointer transition-colors ${
+        className={[
+          'flex-1 flex items-center gap-3 border-2 border-dashed rounded-[var(--radius-lg)] px-4 py-3 cursor-pointer transition-colors duration-150',
           dragging
-            ? 'border-blue-400 bg-blue-50 dark:bg-blue-500/10'
-            : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-500/5'
-        }`}
+            ? 'border-[var(--color-brand)] bg-[var(--color-brand-subtle)]'
+            : 'border-[var(--color-border)] hover:border-[var(--color-brand)] hover:bg-[var(--color-brand-subtle)]',
+        ].join(' ')}
         onClick={() => inputRef.current?.click()}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragging(true);
-        }}
+        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
         onDragLeave={() => setDragging(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragging(false);
-          handleFiles(e.dataTransfer.files);
-        }}
+        onDrop={(e) => { e.preventDefault(); setDragging(false); handleFiles(e.dataTransfer.files); }}
       >
-        <Upload size={16} className="text-slate-400 shrink-0" />
-        <span className="text-slate-500 dark:text-slate-400 text-sm">
+        <Upload size={16} className="text-[var(--color-text-tertiary)] shrink-0" />
+        <span className="text-sm text-[var(--color-text-secondary)]">
           {totalItems > 0
             ? `${totalItems.toLocaleString()} items loaded — drop another CSV to merge`
             : 'Drop Etsy sold-orders CSV here, or click to browse'}
         </span>
         {lastResult && (
-          <span className="ml-auto text-xs font-medium text-green-600 dark:text-green-400 shrink-0">
+          <span className="ml-auto text-xs font-medium text-[var(--color-success)] shrink-0">
             +{lastResult.added} new · {lastResult.duplicates} skipped
           </span>
         )}
@@ -68,36 +63,37 @@ export function SalesMapUpload({ onMerge, onClear, totalItems }: SalesMapUploadP
         />
       </div>
 
-      {totalItems > 0 &&
-        (confirmClear ? (
+      {totalItems > 0 && (
+        confirmClear ? (
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-sm text-slate-500 dark:text-slate-400">Clear all data?</span>
-            <button
-              onClick={() => {
-                onClear();
-                setLastResult(null);
-                setConfirmClear(false);
-              }}
-              className="text-xs px-2 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg cursor-pointer border-none transition-colors"
+            <span className="text-sm text-[var(--color-text-secondary)]">Clear all data?</span>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => { onClear(); setLastResult(null); setConfirmClear(false); }}
             >
-              Yes
-            </button>
-            <button
+              Yes, clear
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setConfirmClear(false)}
-              className="text-xs px-2 py-1 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg cursor-pointer border-none transition-colors"
             >
-              No
-            </button>
+              Cancel
+            </Button>
           </div>
         ) : (
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
+            iconLeft={<Trash2 size={13} />}
             onClick={() => setConfirmClear(true)}
-            className="flex items-center gap-1.5 text-xs px-3 py-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors cursor-pointer border-none bg-transparent shrink-0"
+            className="text-[var(--color-danger)] hover:text-[var(--color-danger)] shrink-0"
           >
-            <Trash2 size={14} />
             Clear All
-          </button>
-        ))}
+          </Button>
+        )
+      )}
     </div>
   );
 }

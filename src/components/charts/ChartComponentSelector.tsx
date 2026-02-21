@@ -11,7 +11,7 @@ export function ChartComponentSelector({ components, selectedId, onChange }: Cha
     <select
       value={selectedId}
       onChange={(e) => onChange(e.target.value)}
-      className="flex-1 sm:flex-none bg-white dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700/60 text-slate-900 dark:text-slate-300 text-sm rounded-xl px-3 py-2.5 focus:outline-none focus:border-blue-500 dark:focus:border-blue-500/60 transition-colors min-w-0"
+      className="flex-1 sm:flex-none bg-[var(--color-bg)] border border-[var(--color-border)] text-[var(--color-text-primary)] text-sm rounded-[var(--radius-md)] px-3 h-8 focus:outline-none focus:border-[var(--color-brand)] focus:shadow-[0_0_0_3px_var(--color-brand-subtle)] transition-[border-color,box-shadow] duration-150 min-w-0"
     >
       {components.map((c) => (
         <option key={c.id} value={c.id}>{c.id} — {c.name}</option>

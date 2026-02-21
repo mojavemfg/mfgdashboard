@@ -36,9 +36,9 @@ export function InventoryLevelChart({ components, isDark }: InventoryLevelChartP
   const reorderBarFill = isDark ? '#334155' : '#cbd5e1';
 
   return (
-    <div className="bg-white dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/50 p-4 shadow-sm dark:shadow-none">
-      <p className="text-slate-800 dark:text-slate-300 text-sm font-semibold mb-1">Stock vs Reorder Point</p>
-      <p className="text-slate-400 text-xs mb-4">Top 10 most at-risk components</p>
+    <div className="bg-[var(--color-bg)] rounded-[var(--radius-lg)] border border-[var(--color-border)] p-4">
+      <p className="text-[var(--color-text-primary)] text-sm font-semibold mb-1">Stock vs Reorder Point</p>
+      <p className="text-[var(--color-text-tertiary)] text-xs mb-4">Top 10 most at-risk components</p>
       <ResponsiveContainer width="100%" height={260}>
         <BarChart data={data} margin={{ top: 4, right: 8, left: -8, bottom: 0 }} barGap={2}>
           <CartesianGrid strokeDasharray="3 3" stroke={grid} vertical={false} />
@@ -63,8 +63,8 @@ export function InventoryLevelChart({ components, isDark }: InventoryLevelChartP
         </BarChart>
       </ResponsiveContainer>
       <div className="flex items-center gap-4 mt-3 justify-center">
-        {[['bg-red-500', 'Critical'], ['bg-yellow-500', 'Warning'], ['bg-green-500', 'OK'], ['bg-slate-400 dark:bg-slate-500', 'Reorder Pt']].map(([color, label]) => (
-          <span key={label} className="flex items-center gap-1.5 text-[10px] text-slate-400">
+        {[['bg-red-500', 'Critical'], ['bg-yellow-500', 'Warning'], ['bg-green-500', 'OK'], ['bg-[var(--color-border-strong)]', 'Reorder Pt']].map(([color, label]) => (
+          <span key={label} className="flex items-center gap-1.5 text-[10px] text-[var(--color-text-tertiary)]">
             <span className={`w-2.5 h-2.5 rounded-sm ${color} inline-block`} />{label}
           </span>
         ))}

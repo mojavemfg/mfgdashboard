@@ -34,19 +34,20 @@ interface DashboardProps {
   updateSettings: (p: SettingsUpdate) => void;
 }
 
-export function Dashboard({ activeView, isDark, salesOrders, onMergeSalesOrders, onClearSalesOrders, onNavigate, printKpis, printEnriched, onUpsertPrintItem, onRemovePrintItem, onThemeToggle, settings, updateSettings }: DashboardProps) {
+export function Dashboard({
+  activeView, isDark, salesOrders, onMergeSalesOrders, onClearSalesOrders,
+  onNavigate, printKpis, printEnriched, onUpsertPrintItem, onRemovePrintItem,
+  onThemeToggle, settings, updateSettings,
+}: DashboardProps) {
   const metrics = useInventoryMetrics();
-
   const salesMetrics = useDashboardSalesMetrics(salesOrders);
   const totalUniqueOrders = new Set(salesOrders.map((o) => o.orderId)).size;
-  const combinedCritical = metrics.criticalCount + printKpis.critical;
-  const combinedWarning = metrics.warningCount + printKpis.warning;
+  const combinedCritical  = metrics.criticalCount + printKpis.critical;
+  const combinedWarning   = metrics.warningCount + printKpis.warning;
 
   return (
-    <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-blue-100/60 dark:from-blue-950/20 to-transparent" />
-
-      <div className="relative px-4 sm:px-6 pt-5 pb-24 md:pb-8">
+    <main className="flex-1 overflow-y-auto bg-[var(--color-bg-subtle)]">
+      <div className="px-4 lg:px-6 pt-6 pb-24 lg:pb-8 max-w-[1440px]">
         {activeView === 'dashboard' && (
           <>
             <PageSection title="Alerts">
@@ -75,33 +76,25 @@ export function Dashboard({ activeView, isDark, salesOrders, onMergeSalesOrders,
         )}
 
         {activeView === 'inventory' && (
-          <PageSection title="Print Inventory">
-            <PrintInventoryView
-              enriched={printEnriched}
-              upsert={onUpsertPrintItem}
-              remove={onRemovePrintItem}
-              kpis={printKpis}
-            />
-          </PageSection>
+          <PrintInventoryView
+            enriched={printEnriched}
+            upsert={onUpsertPrintItem}
+            remove={onRemovePrintItem}
+            kpis={printKpis}
+          />
         )}
 
         {activeView === 'orders' && (
-          <PageSection title="Order History">
-            <OrderHistoryView
-              orders={salesOrders}
-              onMerge={onMergeSalesOrders}
-              onClear={onClearSalesOrders}
-            />
-          </PageSection>
+          <OrderHistoryView
+            orders={salesOrders}
+            onMerge={onMergeSalesOrders}
+            onClear={onClearSalesOrders}
+          />
         )}
 
-        {activeView === 'listings' && (
-          <ListingsView />
-        )}
+        {activeView === 'listings' && <ListingsView />}
 
-        {activeView === 'seo' && (
-          <EtsySeoTool />
-        )}
+        {activeView === 'seo' && <EtsySeoTool />}
 
         {activeView === 'salesmap' && (
           <SalesMapView
@@ -112,9 +105,7 @@ export function Dashboard({ activeView, isDark, salesOrders, onMergeSalesOrders,
           />
         )}
 
-        {activeView === 'margin' && (
-          <MarginCalculatorView settings={settings} />
-        )}
+        {activeView === 'margin' && <MarginCalculatorView settings={settings} />}
 
         {activeView === 'settings' && (
           <SettingsView

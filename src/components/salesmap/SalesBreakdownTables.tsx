@@ -8,23 +8,23 @@ interface TableProps {
 
 function BreakdownTable({ title, rows, labelHeader }: TableProps) {
   return (
-    <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/50 overflow-hidden shadow-sm">
-      <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700/50">
-        <h3 className="text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-widest">
+    <div className="bg-[var(--color-bg)] rounded-[var(--radius-lg)] border border-[var(--color-border)] overflow-hidden">
+      <div className="px-4 py-3 border-b border-[var(--color-border)]">
+        <h3 className="text-[var(--color-text-tertiary)] font-semibold text-xs uppercase tracking-widest">
           {title}
         </h3>
       </div>
       <div className="overflow-y-auto max-h-72">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-100 dark:border-slate-700/50">
-              <th className="text-left px-4 py-2 text-slate-500 dark:text-slate-400 font-medium text-xs">
+            <tr className="border-b border-[var(--color-border)]">
+              <th className="text-left px-4 py-2 text-[var(--color-text-tertiary)] font-medium text-xs">
                 {labelHeader}
               </th>
-              <th className="text-right px-4 py-2 text-slate-500 dark:text-slate-400 font-medium text-xs">
+              <th className="text-right px-4 py-2 text-[var(--color-text-tertiary)] font-medium text-xs">
                 Orders
               </th>
-              <th className="text-right px-4 py-2 text-slate-500 dark:text-slate-400 font-medium text-xs">
+              <th className="text-right px-4 py-2 text-[var(--color-text-tertiary)] font-medium text-xs">
                 Revenue
               </th>
             </tr>
@@ -33,15 +33,15 @@ function BreakdownTable({ title, rows, labelHeader }: TableProps) {
             {rows.map((row) => (
               <tr
                 key={row.key}
-                className="border-b border-slate-50 dark:border-slate-700/30 last:border-0"
+                className="border-b border-[var(--color-border)] last:border-0"
               >
-                <td className="px-4 py-2 text-slate-900 dark:text-slate-200 font-medium">
+                <td className="px-4 py-2 text-[var(--color-text-primary)] font-medium">
                   {row.label}
                 </td>
-                <td className="px-4 py-2 text-right text-slate-600 dark:text-slate-400">
+                <td className="px-4 py-2 text-right text-[var(--color-text-secondary)]">
                   {row.count}
                 </td>
-                <td className="px-4 py-2 text-right text-slate-600 dark:text-slate-400">
+                <td className="px-4 py-2 text-right text-[var(--color-text-secondary)]">
                   ${row.revenue.toFixed(2)}
                 </td>
               </tr>
@@ -50,7 +50,7 @@ function BreakdownTable({ title, rows, labelHeader }: TableProps) {
               <tr>
                 <td
                   colSpan={3}
-                  className="px-4 py-6 text-center text-slate-400 dark:text-slate-500 text-sm"
+                  className="px-4 py-6 text-center text-[var(--color-text-tertiary)] text-sm"
                 >
                   No data
                 </td>

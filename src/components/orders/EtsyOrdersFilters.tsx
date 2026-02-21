@@ -1,4 +1,5 @@
 import { Search } from 'lucide-react';
+import { Select } from '@/components/ui/Input';
 
 export interface EtsyFilterState {
   search: string;
@@ -17,38 +18,42 @@ export function EtsyOrdersFilters({ filters, countries, onChange }: EtsyOrdersFi
     <div className="flex flex-wrap gap-2 mb-3">
       {/* Search */}
       <div className="relative flex-1 min-w-40">
-        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-tertiary)] pointer-events-none" />
         <input
           type="text"
           value={filters.search}
           onChange={(e) => onChange({ ...filters, search: e.target.value })}
           placeholder="Search item, buyer, city…"
-          className="w-full pl-8 pr-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+          className={[
+            'h-8 w-full pl-8 pr-3 text-sm rounded-[var(--radius-md)]',
+            'bg-[var(--color-bg)] border border-[var(--color-border)]',
+            'text-[var(--color-text-primary)] placeholder:text-[var(--color-text-tertiary)]',
+            'transition-[border-color,box-shadow] duration-150 focus:outline-none',
+            'focus:border-[var(--color-brand)] focus:shadow-[0_0_0_3px_var(--color-brand-subtle)]',
+          ].join(' ')}
         />
       </div>
 
       {/* Country */}
-      <select
+      <Select
         value={filters.country}
         onChange={(e) => onChange({ ...filters, country: e.target.value })}
-        className="px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+        className="w-auto min-w-[140px]"
       >
         <option value="All">All Countries</option>
-        {countries.map((c) => (
-          <option key={c} value={c}>{c}</option>
-        ))}
-      </select>
+        {countries.map((c) => <option key={c} value={c}>{c}</option>)}
+      </Select>
 
       {/* Shipped toggle */}
-      <select
+      <Select
         value={filters.shipped}
         onChange={(e) => onChange({ ...filters, shipped: e.target.value as EtsyFilterState['shipped'] })}
-        className="px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-700 dark:text-slate-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+        className="w-auto min-w-[130px]"
       >
         <option value="all">All Statuses</option>
         <option value="shipped">Shipped</option>
         <option value="unshipped">Unshipped</option>
-      </select>
+      </Select>
     </div>
   );
 }

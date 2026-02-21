@@ -27,35 +27,35 @@ export function AlertRow({ component }: AlertRowProps) {
       : `${Math.ceil(component.daysUntilReorder)}d`;
 
   return (
-    <div className={`rounded-xl border ${rowBg} p-3 sm:p-4`}>
+    <div className={`rounded-[var(--radius-lg)] border ${rowBg} p-3 sm:p-4`}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0 ${badge}`}>
             {component.status.toUpperCase()}
           </span>
           <div className="min-w-0">
-            <p className="text-slate-900 dark:text-white text-sm font-semibold truncate leading-tight">{component.name}</p>
-            <p className="text-slate-500 text-xs mt-0.5">{component.id} · {component.supplier}</p>
+            <p className="text-[var(--color-text-primary)] text-sm font-semibold truncate leading-tight">{component.name}</p>
+            <p className="text-[var(--color-text-secondary)] text-xs mt-0.5">{component.id} · {component.supplier}</p>
           </div>
         </div>
         <div className="text-right shrink-0">
           <p className={`text-base font-bold ${urgencyColor}`}>{daysUntil}</p>
-          <p className="text-slate-400 dark:text-slate-500 text-[10px]">to reorder</p>
+          <p className="text-[var(--color-text-tertiary)] text-[10px]">to reorder</p>
         </div>
       </div>
 
-      <div className="mt-3 pt-3 border-t border-slate-200/80 dark:border-slate-700/40 grid grid-cols-3 gap-2">
+      <div className="mt-3 pt-3 border-t border-[var(--color-border)] grid grid-cols-3 gap-2">
         <div>
-          <p className="text-slate-400 text-[10px] uppercase tracking-wider">Reorder Date</p>
-          <p className="text-slate-700 dark:text-slate-200 text-xs font-medium mt-0.5">{component.predictedReorderDate}</p>
+          <p className="text-[var(--color-text-tertiary)] text-[10px] uppercase tracking-wider">Reorder Date</p>
+          <p className="text-[var(--color-text-primary)] text-xs font-medium mt-0.5">{component.predictedReorderDate}</p>
         </div>
         <div>
-          <p className="text-slate-400 text-[10px] uppercase tracking-wider">Suggest Qty</p>
-          <p className="text-slate-700 dark:text-slate-200 text-xs font-medium mt-0.5">{component.reorderQty.toLocaleString()}</p>
+          <p className="text-[var(--color-text-tertiary)] text-[10px] uppercase tracking-wider">Suggest Qty</p>
+          <p className="text-[var(--color-text-primary)] text-xs font-medium mt-0.5">{component.reorderQty.toLocaleString()}</p>
         </div>
         <div>
-          <p className="text-slate-400 text-[10px] uppercase tracking-wider">Stock Left</p>
-          <p className="text-slate-700 dark:text-slate-200 text-xs font-medium mt-0.5">{component.currentStock.toLocaleString()} {component.unit}</p>
+          <p className="text-[var(--color-text-tertiary)] text-[10px] uppercase tracking-wider">Stock Left</p>
+          <p className="text-[var(--color-text-primary)] text-xs font-medium mt-0.5">{component.currentStock.toLocaleString()} {component.unit}</p>
         </div>
       </div>
     </div>

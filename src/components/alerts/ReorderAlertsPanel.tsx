@@ -18,7 +18,7 @@ export function ReorderAlertsPanel({ components }: ReorderAlertsPanelProps) {
 
   if (alerts.length === 0) {
     return (
-      <div className="flex items-center gap-2.5 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/15 border border-green-200 dark:border-green-800/40 rounded-xl px-4 py-3.5">
+      <div className="flex items-center gap-2.5 text-[var(--color-success)] bg-[var(--color-success-subtle)] border border-[var(--color-success-border)] rounded-[var(--radius-lg)] px-4 py-3.5">
         <CheckCircle2 size={18} />
         <span className="text-sm">All components are within safe stock levels.</span>
       </div>

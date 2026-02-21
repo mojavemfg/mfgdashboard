@@ -72,7 +72,7 @@ export function ListingsTable({ listings, onRetryAI }: Props) {
     return sortDir === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />;
   }
 
-  const thCls = 'px-3 py-2.5 text-left text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer select-none hover:text-slate-700 dark:hover:text-slate-200 transition-colors';
+  const thCls = 'px-3 py-2.5 text-left text-[10px] font-semibold text-[var(--color-text-tertiary)] uppercase tracking-wider cursor-pointer select-none hover:text-[var(--color-text-primary)] transition-colors';
 
   return (
     <div>
@@ -84,8 +84,8 @@ export function ListingsTable({ listings, onRetryAI }: Props) {
             onClick={() => setFilter(f)}
             className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer border-none ${
               filter === f
-                ? 'bg-blue-600 text-white'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                ? 'bg-[var(--color-brand)] text-white'
+                : 'bg-[var(--color-bg-muted)] text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)]'
             }`}
           >
             {f === 'all' ? `All (${listings.length})` : `Needs Work (<75)`}
@@ -94,10 +94,10 @@ export function ListingsTable({ listings, onRetryAI }: Props) {
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm dark:shadow-none overflow-hidden">
+      <div className="bg-[var(--color-bg)] rounded-[var(--radius-lg)] border border-[var(--color-border)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="border-b border-slate-100 dark:border-slate-700/40">
+            <thead className="border-b border-[var(--color-border)]">
               <tr>
                 <th className={thCls} onClick={() => toggleSort('overall')}>
                   <div className="flex items-center gap-1">Score <SortIcon k="overall" /></div>
@@ -119,44 +119,44 @@ export function ListingsTable({ listings, onRetryAI }: Props) {
                 <th className="w-8" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-700/30">
+            <tbody className="divide-y divide-[var(--color-border)]">
               {sorted.map((listing) => {
                 const isExpanded = expandedIdx === listing.index;
                 return (
                   <Fragment key={listing.index}>
                     <tr
-                      className="hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors cursor-pointer"
+                      className="hover:bg-[var(--color-bg-subtle)] transition-colors cursor-pointer"
                       onClick={() => setExpandedIdx(isExpanded ? null : listing.index)}
                     >
                       <td className="px-3 py-3">
                         <ScoreBadge score={listing.overall} />
                       </td>
                       <td className="px-3 py-3">
-                        <span className="text-sm text-slate-800 dark:text-slate-200 line-clamp-1 max-w-xs block">
+                        <span className="text-sm text-[var(--color-text-primary)] line-clamp-1 max-w-xs block">
                           {listing.title}
                         </span>
                       </td>
                       <td className="px-3 py-3 text-center">
                         <SubScoreChip score={listing.subScores.tags} />
-                        <span className="text-[10px] text-slate-400 ml-1">({listing.tags.length}/13)</span>
+                        <span className="text-[10px] text-[var(--color-text-tertiary)] ml-1">({listing.tags.length}/13)</span>
                       </td>
                       <td className="px-3 py-3 text-center">
                         <SubScoreChip score={listing.subScores.title} />
                       </td>
                       <td className="px-3 py-3 text-center">
                         <SubScoreChip score={listing.subScores.images} />
-                        <span className="text-[10px] text-slate-400 ml-1">({listing.images.length}/10)</span>
+                        <span className="text-[10px] text-[var(--color-text-tertiary)] ml-1">({listing.images.length}/10)</span>
                       </td>
                       <td className="px-3 py-3 text-center">
                         <SubScoreChip score={listing.subScores.description} />
                       </td>
                       <td className="px-3 py-3">
-                        <span className="text-sm text-slate-700 dark:text-slate-300">${listing.price.toFixed(2)}</span>
+                        <span className="text-sm text-[var(--color-text-secondary)]">${listing.price.toFixed(2)}</span>
                       </td>
                       <td className="px-2 py-3">
                         <ChevronRight
                           size={15}
-                          className={`text-slate-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+                          className={`text-[var(--color-text-tertiary)] transition-transform ${isExpanded ? 'rotate-90' : ''}`}
                         />
                       </td>
                     </tr>
@@ -175,7 +175,7 @@ export function ListingsTable({ listings, onRetryAI }: Props) {
               })}
               {sorted.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-8 text-center text-slate-400 text-sm">
+                  <td colSpan={8} className="px-4 py-8 text-center text-[var(--color-text-tertiary)] text-sm">
                     No listings match the current filter.
                   </td>
                 </tr>

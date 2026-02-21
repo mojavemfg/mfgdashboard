@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Plus, Package, DollarSign, AlertTriangle, AlertCircle } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { PrintInventoryTable } from './PrintInventoryTable';
 import { PrintItemForm } from './PrintItemForm';
 import { KpiCard } from '@/components/kpi/KpiCard';
+import { Button } from '@/components/ui/Button';
 import type { PrintItemWithStatus, PrintItem } from '@/types/printInventory';
 
 interface PrintInventoryViewProps {
@@ -20,51 +21,36 @@ export function PrintInventoryView({ enriched, upsert, remove, kpis }: PrintInve
 
   return (
     <div>
-      {/* KPI Strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <KpiCard
-          label="Total Items"
-          value={kpis.total}
-          icon={<Package size={18} />}
-          accent="blue"
-        />
+      {/* Page header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-[var(--color-text-primary)]">Print Inventory</h1>
+          <p className="text-sm text-[var(--color-text-secondary)] mt-0.5">
+            Track filament, inserts, and spare parts
+          </p>
+        </div>
+        <Button
+          variant="primary"
+          size="md"
+          iconLeft={<Plus size={14} />}
+          onClick={() => setEditTarget('new')}
+        >
+          Add Item
+        </Button>
+      </div>
+
+      {/* KPI strip */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <KpiCard label="Total Items"  value={kpis.total} />
         <KpiCard
           label="Total Value"
           value={`$${kpis.totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-          icon={<DollarSign size={18} />}
-          accent="green"
         />
-        <KpiCard
-          label="Critical"
-          value={kpis.critical}
-          icon={<AlertTriangle size={18} />}
-          accent="red"
-          sub="below safety stock"
-        />
-        <KpiCard
-          label="Warning"
-          value={kpis.warning}
-          icon={<AlertCircle size={18} />}
-          accent="yellow"
-          sub="approaching safety stock"
-        />
+        <KpiCard label="Critical"     value={kpis.critical}  sub="below safety stock" />
+        <KpiCard label="Warning"      value={kpis.warning}   sub="approaching safety stock" />
       </div>
 
-      {/* Add button */}
-      <div className="flex justify-end mb-4">
-        <button
-          onClick={() => setEditTarget('new')}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
-        >
-          <Plus size={15} />
-          Add Item
-        </button>
-      </div>
-
-      <PrintInventoryTable
-        items={enriched}
-        onEdit={(item) => setEditTarget(item)}
-      />
+      <PrintInventoryTable items={enriched} onEdit={(item) => setEditTarget(item)} />
 
       {modalOpen && (
         <PrintItemForm

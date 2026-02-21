@@ -27,9 +27,9 @@ export function ConsumptionTrendChart({ componentId, componentName, records, avg
   const tooltipLabel = isDark ? '#94a3b8' : '#475569';
 
   return (
-    <div className="bg-white dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/50 p-4 shadow-sm dark:shadow-none">
-      <p className="text-slate-800 dark:text-slate-300 text-sm font-semibold mb-1">{componentName}</p>
-      <p className="text-slate-400 text-xs mb-4">90-day consumption · avg {avgDaily.toFixed(1)} units/day</p>
+    <div className="bg-[var(--color-bg)] rounded-[var(--radius-lg)] border border-[var(--color-border)] p-4">
+      <p className="text-[var(--color-text-primary)] text-sm font-semibold mb-1">{componentName}</p>
+      <p className="text-[var(--color-text-tertiary)] text-xs mb-4">90-day consumption · avg {avgDaily.toFixed(1)} units/day</p>
       <ResponsiveContainer width="100%" height={220}>
         <LineChart data={data} margin={{ top: 4, right: 8, left: -8, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke={grid} />
