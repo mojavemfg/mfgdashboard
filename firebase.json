@@ -1,0 +1,11 @@
+{
+  "auth": {
+    "providers": {
+      "emailPassword": true,
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "MFG Ops Platform",
+        "supportEmail": "mojave.mfg@gmail.com"
+      }
+    }
+  }
+}
