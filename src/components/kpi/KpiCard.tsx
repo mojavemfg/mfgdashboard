@@ -1,9 +1,6 @@
-import type { ReactNode } from 'react';
-
 interface KpiCardProps {
   label: string;
   value: string | number;
-  icon?: ReactNode;
   trend?: { value: string; positive: boolean };
   sub?: string;
 }

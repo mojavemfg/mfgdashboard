@@ -6,6 +6,19 @@ import { AuthLayout } from '@/components/auth/AuthLayout';
 import { OAuthButtons } from '@/components/auth/OAuthButtons';
 import { AuthDivider } from '@/components/auth/AuthDivider';
 
+function friendlySignUpError(err: unknown): string {
+  const msg = err instanceof Error ? err.message : '';
+  if (msg.includes('email-already-in-use'))
+    return 'An account with this email already exists';
+  if (msg.includes('weak-password'))
+    return 'Password is too weak. Use at least 8 characters with a mix of letters and numbers.';
+  if (msg.includes('invalid-email'))
+    return 'Please enter a valid email address';
+  if (msg.includes('network-request-failed'))
+    return 'Network error. Check your connection.';
+  return 'Sign up failed. Please try again.';
+}
+
 export function SignUpPage() {
   const { user, signUp, signInWithGoogle, signInWithApple } = useAuth();
 
@@ -25,12 +38,16 @@ export function SignUpPage() {
       setError('Please agree to the Terms & Privacy Policy');
       return;
     }
+    if (password.length < 8 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+      setError('Password must be at least 8 characters with letters and numbers');
+      return;
+    }
     setError('');
     setLoading(true);
     try {
       await signUp(email, password, fullName);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Sign up failed');
+      setError(friendlySignUpError(err));
     } finally {
       setLoading(false);
     }
@@ -42,7 +59,7 @@ export function SignUpPage() {
     try {
       await fn();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Sign in failed');
+      setError(friendlySignUpError(err));
     } finally {
       setLoading(false);
     }
@@ -112,7 +129,7 @@ export function SignUpPage() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Create a password"
               required
-              minLength={6}
+              minLength={8}
               className={inputCls}
             />
             <button

@@ -10,9 +10,8 @@ export function useSidebar(watchValue?: unknown) {
   const [isOpen, setIsOpen] = useState(false);
 
   // Auto-close when the watched value changes (i.e. user navigated to a new view)
-  useEffect(() => {
-    setIsOpen(false);
-  }, [watchValue]);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional sync: close sidebar on navigation
+  useEffect(() => { setIsOpen(false); }, [watchValue]);
 
   // Close on Escape key
   useEffect(() => {

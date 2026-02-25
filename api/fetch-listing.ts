@@ -34,8 +34,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'url parameter required' });
   }
 
-  if (!url.includes('etsy.com')) {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return res.status(400).json({ error: 'Invalid URL' });
+  }
+
+  if (parsed.hostname !== 'www.etsy.com' && parsed.hostname !== 'etsy.com') {
     return res.status(400).json({ error: 'Only etsy.com URLs are supported' });
+  }
+
+  if (parsed.protocol !== 'https:') {
+    return res.status(400).json({ error: 'Only HTTPS URLs are supported' });
   }
 
   try {

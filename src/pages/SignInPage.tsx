@@ -1,11 +1,24 @@
 import { useState, type FormEvent } from 'react';
 import { Navigate, Link } from 'react-router';
 import { Eye, EyeOff } from 'lucide-react';
+import { browserLocalPersistence, browserSessionPersistence, setPersistence } from 'firebase/auth';
+import { auth as firebaseAuth } from '@/lib/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/Toast';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 import { OAuthButtons } from '@/components/auth/OAuthButtons';
 import { AuthDivider } from '@/components/auth/AuthDivider';
+
+function friendlyAuthError(err: unknown): string {
+  const msg = err instanceof Error ? err.message : '';
+  if (msg.includes('user-not-found') || msg.includes('wrong-password') || msg.includes('invalid-credential'))
+    return 'Invalid email or password';
+  if (msg.includes('too-many-requests'))
+    return 'Too many attempts. Please try again later.';
+  if (msg.includes('network-request-failed'))
+    return 'Network error. Check your connection.';
+  return 'Sign in failed. Please try again.';
+}
 
 export function SignInPage() {
   const { user, signIn, signInWithGoogle, signInWithApple, resetPassword } = useAuth();
@@ -25,9 +38,10 @@ export function SignInPage() {
     setError('');
     setLoading(true);
     try {
+      await setPersistence(firebaseAuth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
       await signIn(email, password);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Sign in failed');
+      setError(friendlyAuthError(err));
     } finally {
       setLoading(false);
     }
@@ -37,9 +51,10 @@ export function SignInPage() {
     setError('');
     setLoading(true);
     try {
+      await setPersistence(firebaseAuth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
       await fn();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Sign in failed');
+      setError(friendlyAuthError(err));
     } finally {
       setLoading(false);
     }
@@ -53,8 +68,8 @@ export function SignInPage() {
     try {
       await resetPassword(email);
       toast('Reset link sent to your email', 'success');
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Could not send reset email');
+    } catch {
+      setError('Could not send reset email. Check the address and try again.');
     }
   }
 

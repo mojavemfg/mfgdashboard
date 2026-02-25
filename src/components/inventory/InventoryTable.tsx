@@ -34,18 +34,16 @@ export function InventoryTable({ components }: InventoryTableProps) {
     return sortAsc ? (av as number) - (bv as number) : (bv as number) - (av as number);
   });
 
-  function SortIcon({ col }: { col: SortKey }) {
+  const sortIcon = (col: SortKey) => {
     if (sortKey !== col) return <ChevronUp size={11} className="text-[var(--color-border-strong)]" />;
     return sortAsc ? <ChevronUp size={11} className="text-[var(--color-brand)]" /> : <ChevronDown size={11} className="text-[var(--color-brand)]" />;
-  }
+  };
 
-  function Th({ col, label }: { col: SortKey; label: string }) {
-    return (
-      <th onClick={() => handleSort(col)} className="px-3 py-2.5 text-left text-[10px] font-semibold text-[var(--color-text-tertiary)] uppercase tracking-wider cursor-pointer hover:text-[var(--color-text-primary)] select-none whitespace-nowrap">
-        <div className="flex items-center gap-1">{label}<SortIcon col={col} /></div>
-      </th>
-    );
-  }
+  const th = (col: SortKey, label: string) => (
+    <th onClick={() => handleSort(col)} className="px-3 py-2.5 text-left text-[10px] font-semibold text-[var(--color-text-tertiary)] uppercase tracking-wider cursor-pointer hover:text-[var(--color-text-primary)] select-none whitespace-nowrap">
+      <div className="flex items-center gap-1">{label}{sortIcon(col)}</div>
+    </th>
+  );
 
   const urgencyText = (c: ComponentWithMetrics) =>
     c.daysUntilReorder <= 3 ? 'text-[var(--color-danger)] font-semibold' :
@@ -90,15 +88,15 @@ export function InventoryTable({ components }: InventoryTableProps) {
             <thead className="bg-[var(--color-bg-subtle)] border-b border-[var(--color-border)]">
               <tr>
                 <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-[var(--color-text-tertiary)] uppercase tracking-wider">ID</th>
-                <Th col="name" label="Name" />
+                {th('name', 'Name')}
                 <th className="px-3 py-2.5 text-left text-[10px] font-semibold text-[var(--color-text-tertiary)] uppercase tracking-wider">Category</th>
-                <Th col="currentStock" label="Stock" />
-                <Th col="avgDailyConsumption" label="Avg/Day" />
-                <Th col="daysOfStockRemaining" label="Days Left" />
-                <Th col="reorderPoint" label="Reorder Pt" />
-                <Th col="daysUntilReorder" label="Days to RO" />
-                <Th col="totalInventoryValue" label="Value" />
-                <Th col="status" label="Status" />
+                {th('currentStock', 'Stock')}
+                {th('avgDailyConsumption', 'Avg/Day')}
+                {th('daysOfStockRemaining', 'Days Left')}
+                {th('reorderPoint', 'Reorder Pt')}
+                {th('daysUntilReorder', 'Days to RO')}
+                {th('totalInventoryValue', 'Value')}
+                {th('status', 'Status')}
               </tr>
             </thead>
             <tbody>

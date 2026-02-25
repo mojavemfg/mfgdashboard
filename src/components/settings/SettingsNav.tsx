@@ -6,6 +6,7 @@ export interface SettingsSection {
   Icon: React.ComponentType<{ size?: number; className?: string }>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const SETTINGS_SECTIONS: SettingsSection[] = [
   { id: 'shop-profile',     label: 'Shop Profile',      Icon: Store },
   { id: 'printing',         label: 'Printing Defaults', Icon: Printer },

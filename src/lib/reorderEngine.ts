@@ -1,6 +1,14 @@
 import type { SubComponent, ConsumptionRecord, ComponentWithMetrics, ReorderStatus } from '@/types';
 
-const TODAY = '2026-02-19';
+function todayStr(): string {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+const TODAY = todayStr();
 
 function addDays(dateStr: string, days: number): string {
   const d = new Date(dateStr);

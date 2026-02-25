@@ -31,6 +31,7 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
@@ -68,6 +69,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const handleSignOut = useCallback(async () => {
     await firebaseSignOut(auth);
+    // Clear user-specific data to prevent data leakage between accounts
+    const keysToRemove = [
+      'mfg_settings', 'mfg-print-inventory', 'salesmap_orders',
+      'margin_filament_library', 'margin_presets',
+      'anthropic_api_key', 'google_api_key', 'openai_api_key',
+    ];
+    keysToRemove.forEach((k) => localStorage.removeItem(k));
   }, []);
 
   const resetPassword = useCallback(async (email: string) => {

@@ -3,6 +3,7 @@ import { Calculator, Plus, X, Pencil, Check, Trash2 } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import type { AppSettings } from '@/hooks/useSettings';
 
+/* eslint-disable react-refresh/only-export-components */
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface FilamentPreset {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import type { PrintItem, PrintCategory } from '@/types/printInventory';
 import { Modal } from '@/components/ui/Modal';
@@ -38,11 +38,6 @@ export function PrintItemForm({ initial, onSave, onDelete, onClose }: Props) {
     initial ? { ...blankForm(), ...initial } : blankForm()
   );
   const [confirmDelete, setConfirmDelete] = useState(false);
-
-  useEffect(() => {
-    setForm(initial ? { ...blankForm(), ...initial } : blankForm());
-    setConfirmDelete(false);
-  }, [initial]);
 
   function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));

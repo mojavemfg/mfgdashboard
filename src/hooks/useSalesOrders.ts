@@ -14,7 +14,9 @@ function load(): EtsyOrderItem[] {
 }
 
 function save(records: EtsyOrderItem[]): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+  } catch { /* QuotaExceededError — data stays in memory */ }
 }
 
 export interface MergeResult {

@@ -67,10 +67,10 @@ export function ListingsTable({ listings, onRetryAI }: Props) {
     return sortDir === 'asc' ? av - bv : bv - av;
   });
 
-  function SortIcon({ k }: { k: SortKey }) {
+  const sortIcon = (k: SortKey) => {
     if (sortKey !== k) return <ChevronDown size={12} className="opacity-30" />;
     return sortDir === 'asc' ? <ChevronUp size={12} /> : <ChevronDown size={12} />;
-  }
+  };
 
   const thCls = 'px-3 py-2.5 text-left text-[10px] font-semibold text-[var(--color-text-tertiary)] uppercase tracking-wider cursor-pointer select-none hover:text-[var(--color-text-primary)] transition-colors';
 
@@ -152,21 +152,21 @@ export function ListingsTable({ listings, onRetryAI }: Props) {
             <thead className="border-b border-[var(--color-border)]">
               <tr>
                 <th className={thCls} onClick={() => toggleSort('overall')}>
-                  <div className="flex items-center gap-1">Score <SortIcon k="overall" /></div>
+                  <div className="flex items-center gap-1">Score {sortIcon('overall')}</div>
                 </th>
                 <th className={`${thCls} min-w-48`} onClick={() => toggleSort('title')}>
-                  <div className="flex items-center gap-1">Title <SortIcon k="title" /></div>
+                  <div className="flex items-center gap-1">Title {sortIcon('title')}</div>
                 </th>
                 <th className={thCls} onClick={() => toggleSort('tags')}>
-                  <div className="flex items-center gap-1">Tags <SortIcon k="tags" /></div>
+                  <div className="flex items-center gap-1">Tags {sortIcon('tags')}</div>
                 </th>
                 <th className={thCls}>Title</th>
                 <th className={thCls} onClick={() => toggleSort('images')}>
-                  <div className="flex items-center gap-1">Imgs <SortIcon k="images" /></div>
+                  <div className="flex items-center gap-1">Imgs {sortIcon('images')}</div>
                 </th>
                 <th className={thCls}>Desc</th>
                 <th className={thCls} onClick={() => toggleSort('price')}>
-                  <div className="flex items-center gap-1">Price <SortIcon k="price" /></div>
+                  <div className="flex items-center gap-1">Price {sortIcon('price')}</div>
                 </th>
                 <th className="w-8" />
               </tr>

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Bell, Sun, Moon, Menu, LogOut, AlertOctagon, AlertTriangle, ShoppingBag, CheckCircle2 } from 'lucide-react';
 import type { View } from '@/App';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,15 +20,22 @@ interface HeaderProps {
   onNavigate?: (view: View) => void;
 }
 
-// Shared hook for click-outside + Escape dismiss
-function useDropdown() {
+// Shared hook for click-outside + Escape dismiss.
+// Returns [open, setOpen, callbackRef] as a tuple to avoid
+// the react-hooks/refs lint rule flagging property access on
+// an object that contains a ref.
+function useDropdown(): [boolean, React.Dispatch<React.SetStateAction<boolean>>, (node: HTMLDivElement | null) => void] {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const elRef = useRef<HTMLDivElement | null>(null);
+
+  const callbackRef = useCallback((node: HTMLDivElement | null) => {
+    elRef.current = node;
+  }, []);
 
   useEffect(() => {
     if (!open) return;
     const onMouse = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (elRef.current && !elRef.current.contains(e.target as Node)) setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') { e.preventDefault(); setOpen(false); }
@@ -41,7 +48,7 @@ function useDropdown() {
     };
   }, [open]);
 
-  return { open, setOpen, ref };
+  return [open, setOpen, callbackRef];
 }
 
 const severityIcon = {
@@ -60,8 +67,8 @@ export function Header({
   onNavigate,
 }: HeaderProps) {
   const { signOut, user } = useAuth();
-  const bell   = useDropdown();
-  const avatar = useDropdown();
+  const [bellOpen, setBellOpen, bellRef]       = useDropdown();
+  const [avatarOpen, setAvatarOpen, avatarRef] = useDropdown();
 
   const criticalCount = alerts.filter(a => a.severity === 'critical').length;
   const totalCount    = alerts.length;
@@ -78,7 +85,7 @@ export function Header({
 
   function handleAlertClick(view: View) {
     onNavigate?.(view);
-    bell.setOpen(false);
+    setBellOpen(false);
   }
 
   return (
@@ -122,12 +129,12 @@ export function Header({
         </button>
 
         {/* Notification bell + dropdown */}
-        <div ref={bell.ref} className="relative">
+        <div ref={bellRef} className="relative">
           <button
-            onClick={() => bell.setOpen(v => !v)}
+            onClick={() => setBellOpen(v => !v)}
             aria-label="Notifications"
             aria-haspopup="true"
-            aria-expanded={bell.open}
+            aria-expanded={bellOpen}
             className={[
               iconBtn,
               criticalCount > 0
@@ -146,7 +153,7 @@ export function Header({
           )}
 
           {/* Notification dropdown panel */}
-          {bell.open && (
+          {bellOpen && (
             <div className="absolute right-0 top-full mt-1 w-80 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] z-50 overflow-hidden animate-modal-in">
               {/* Header row */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-border)]">
@@ -212,12 +219,12 @@ export function Header({
         </div>
 
         {/* Avatar with dropdown */}
-        <div ref={avatar.ref} className="relative ml-1">
+        <div ref={avatarRef} className="relative ml-1">
           <button
-            onClick={() => avatar.setOpen(v => !v)}
+            onClick={() => setAvatarOpen(v => !v)}
             aria-label="User menu"
             aria-haspopup="menu"
-            aria-expanded={avatar.open}
+            aria-expanded={avatarOpen}
             className={[
               'w-7 h-7 rounded-[var(--radius-full)] bg-[var(--color-bg-muted)]',
               'border border-[var(--color-border)] flex items-center justify-center',
@@ -230,7 +237,7 @@ export function Header({
             {(user?.displayName?.[0] ?? user?.email?.[0] ?? 'U').toUpperCase()}
           </button>
 
-          {avatar.open && (
+          {avatarOpen && (
             <div className="absolute right-0 top-full mt-1 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-[var(--radius-lg)] shadow-[var(--shadow-md)] py-1 min-w-[160px] z-50">
               <button onClick={signOut} className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text-primary)] transition-colors">
                 <LogOut size={14} />

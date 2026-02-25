@@ -54,6 +54,7 @@ export function PrintInventoryView({ enriched, upsert, remove, kpis }: PrintInve
 
       {modalOpen && (
         <PrintItemForm
+          key={modalItem?.id ?? 'new'}
           initial={modalItem}
           onSave={upsert}
           onDelete={remove}
